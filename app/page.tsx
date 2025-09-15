@@ -1,0 +1,1 @@
+export default function Home(){return(<main style={{padding:24}}><h1>Proyecto listo</h1><p>Usá <a href='/publish-tester'>/publish-tester</a> para probar DRAFT/PUBLISH.</p></main>)}
