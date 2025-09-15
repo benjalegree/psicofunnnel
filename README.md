@@ -1,1 +1,0 @@
-# Proyecto listo para nuevo dominio\nSúbelo a la raíz del repo, configura variables en Vercel y conecta el dominio.\n
