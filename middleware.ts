@@ -2,9 +2,9 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-// Dominios base donde querés subdominios
+// dominios donde querés subdominios
 const BASES = new Set(['psicofunnel.online']);
-// Slugs válidos: minúsculas, números y guiones (DNS-safe)
+const RESERVED = new Set(['www','api','crm','preview','s']);
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/;
 
 export function middleware(req: NextRequest) {
@@ -12,23 +12,25 @@ export function middleware(req: NextRequest) {
   const host = req.headers.get('host') || '';
   const p = url.pathname;
 
-  // Deja pasar API y rutas canónicas
+  // Dejar pasar rutas claves
   if (p.startsWith('/api')) return NextResponse.next();
   if (p.startsWith('/s/')) return NextResponse.next();
   if (p.startsWith('/preview/')) return NextResponse.next();
+  if (p.startsWith('/crm')) return NextResponse.next();
 
-  // No forzar en dominios de preview de Vercel
+  // No tocar deployments *.vercel.app
   if (host.endsWith('.vercel.app')) return NextResponse.next();
 
-  // Reescritura de subdominio → /s/{slug}
+  // Reescritura subdominio → /s/{slug}
   const labels = host.split('.');
   if (labels.length >= 3) {
-    const base = labels.slice(-2).join('.'); // ej: psicofunnel.online
+    const base = labels.slice(-2).join('.'); // psicofunnel.online
+    const first = labels[0];                 // primer label (puede ser 'www' o el slug real)
     if (BASES.has(base)) {
-      let candidate = labels[0] === 'www' ? labels[1] : labels[0];
-      if (SLUG.test(candidate) && !['www','api','crm','preview','s'].includes(candidate)) {
+      // si empieza con www -> no reescribimos (tratamos como dominio principal)
+      if (first !== 'www' && SLUG.test(first) && !RESERVED.has(first)) {
         const to = url.clone();
-        to.pathname = `/s/${candidate}`;
+        to.pathname = `/s/${first}`;
         return NextResponse.rewrite(to);
       }
     }
