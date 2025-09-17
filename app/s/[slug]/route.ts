@@ -1,41 +1,41 @@
-import { list } from '@vercel/blob';
+// app/s/[slug]/route.ts
 export const runtime = 'edge';
 
-function isSafeBlobURL(u: string) {
-  try {
-    const h = new URL(u).hostname;
-    return h.endsWith('.public.blob.vercel-storage.com') || h.endsWith('.vercel-storage.com');
-  } catch { return false; }
-}
-
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+/**
+ * Sirve una landing publicada.
+ * Si viene ?u= (URL del Blob) lo usa directo.
+ * Si no, intenta resolver la última URL publicada desde Apps Script (Projects).
+ */
+export async function GET(req: Request, ctx: { params: { slug: string } }) {
+  const { slug } = ctx.params;
   const url = new URL(req.url);
-  const direct = url.searchParams.get('u');
+  const u = url.searchParams.get('u');
 
-  // 1) si viene la URL directa del blob, servirla
-  if (direct && isSafeBlobURL(direct)) {
-    const html = await (await fetch(direct)).text();
-    return new Response(html, {
-      headers: { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'public, max-age=60' }
-    });
+  const cleaned = String(slug||'').trim().toLowerCase();
+  if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/.test(cleaned)) {
+    return new Response('Invalid slug', { status: 400 });
   }
 
-  // 2) fallback: buscar index*.html en sites/{slug}
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  const pickIndex = (blobs: any[]) =>
-    blobs.find((b: any) => /\/index(\-[^\/]+)?\.html$/.test(b.pathname)) || blobs[0];
+  let blobUrl = u || '';
+
+  // Resolver desde Apps Script si no vino ?u=
+  if (!blobUrl) {
+    const endpoint = process.env.APPS_SCRIPT_ENDPOINT;
+    if (!endpoint) return new Response('Missing env', { status: 500 });
+    const info = await fetch(`${endpoint}?action=projectInfo&slug=${encodeURIComponent(cleaned)}`);
+    const txt = await info.text();
+    let data:any; try{ data = JSON.parse(txt) }catch{}
+    blobUrl = data?.last_published_url || data?.blob || '';
+    if (!blobUrl) return new Response('Not found', { status: 404 });
+  }
 
   try {
-    let { blobs } = await list({ prefix: `sites/${params.slug}/index`, token });
-    if (!blobs.length) ({ blobs } = await list({ prefix: `sites/${params.slug}/`, token }));
-    if (!blobs.length) return new Response('Not found', { status: 404 });
-
-    const file = pickIndex(blobs);
-    const html = await (await fetch(file.url)).text();
+    const resp = await fetch(blobUrl, { cache: 'no-store' });
+    const html = await resp.text();
     return new Response(html, {
-      headers: { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'public, max-age=60' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
     });
-  } catch {
-    return new Response('Not found', { status: 404 });
+  } catch (e:any) {
+    return new Response('Failed to load content', { status: 502 });
   }
 }
