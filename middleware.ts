@@ -1,41 +1,57 @@
 // middleware.ts
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
-const BASES = new Set(['psicofunnel.online']);
-const RESERVED = new Set(['www','api','crm','preview','s']);
+// Dominios base que NO debemos tocar (home y www)
+const APEX = new Set(['psicofunnel.online', 'www.psicofunnel.online']);
+
+// Palabras reservadas para no confundir con slugs
+const RESERVED = new Set(['www', 'api', 'crm', 'preview', 's', '_next']);
+
+// Slug válido: minúsculas, números y guiones (1-63 chars, sin guión al inicio/fin)
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/;
 
 export function middleware(req: NextRequest) {
-  const url = req.nextUrl;
-  const host = req.headers.get('host') || '';
-  const p = url.pathname;
+  const { nextUrl, headers } = req;
+  const host = headers.get('host') || '';
+  const pathname = nextUrl.pathname;
 
-  // Ignorar deploy previews (dominios *.vercel.app)
+  // 1) Ignorar deploy previews (*.vercel.app)
   if (host.endsWith('.vercel.app')) return NextResponse.next();
 
-  // **NUNCA** reescribir apex ni www
-  if (host === 'psicofunnel.online' || host === 'www.psicofunnel.online') {
+  // 2) No tocar apex ni www (la home y /crm se sirven estáticos)
+  if (APEX.has(host)) return NextResponse.next();
+
+  // 3) No interceptar rutas internas de la app
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/s/') ||
+    pathname.startsWith('/preview/') ||
+    pathname.startsWith('/crm') ||
+    pathname === '/' ||
+    pathname === '/index.html'
+  ) {
     return NextResponse.next();
   }
 
-  // Dejar pasar rutas claves
-  if (p.startsWith('/api')) return NextResponse.next();
-  if (p.startsWith('/s/')) return NextResponse.next();
-  if (p.startsWith('/preview/')) return NextResponse.next();
-  if (p.startsWith('/crm')) return NextResponse.next();
-  if (p === '/' || p === '/index.html') return NextResponse.next();
+  // 4) Si hay subdominio {slug}.psicofunnel.online → reescribir a /s/{slug}
+  const parts = host.split('.');
+  if (parts.length >= 3) {
+    const base = parts.slice(-2).join('.');
+    const sub = parts.slice(0, -2).join('-'); // soporte a sub.sub → sub-sub
 
-  // Sólo reescribir si es un subdominio real (marca.psicofunnel.online → /s/marca)
-  const labels = host.split('.');
-  if (labels.length >= 3) {
-    const base = labels.slice(-2).join('.');
-    const first = labels[0];
-    if (BASES.has(base) && !RESERVED.has(first) && SLUG.test(first)) {
-      const to = url.clone();
-      to.pathname = `/s/${first}`;
-      return NextResponse.rewrite(to);
+    if (base === 'psicofunnel.online' && !RESERVED.has(sub) && SLUG.test(sub)) {
+      const url = nextUrl.clone();
+      url.pathname = `/s/${sub}`;
+      return NextResponse.rewrite(url);
     }
   }
+
+  // Si no aplica nada, seguir normal
   return NextResponse.next();
 }
+
+// MUY IMPORTANTE: no ejecutar el middleware en rutas con punto (archivos .html, .ico, etc.)
+export const config = {
+  matcher: ['/((?!.*\\.).*)'],
+};
