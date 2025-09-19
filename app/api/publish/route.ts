@@ -1,6 +1,7 @@
 // app/api/publish/route.ts
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+
 export const runtime = 'nodejs';
 
 type PublishBody = {
@@ -22,11 +23,13 @@ export async function POST(req: Request) {
   try {
     const { key, slug, html, mode }: PublishBody = await req.json();
 
+    // 1) Auth simple por clave
     const PUBLISH_KEY = process.env.PUBLISH_KEY;
     if (!PUBLISH_KEY || key !== PUBLISH_KEY) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    // 2) Validaciones
     const s = (slug || '').trim().toLowerCase();
     if (!s || !/^[a-z0-9-]+$/.test(s)) {
       return NextResponse.json({ ok: false, error: 'Invalid slug' }, { status: 400 });
@@ -40,26 +43,30 @@ export async function POST(req: Request) {
     const hash = sha1(html + now);
     const filename = `index-${hash}.html`;
 
-    // 1) Sube HTML
+    // 3) Subir la versión HTML (con sufijo aleatorio OK)
     const htmlPath = `sites/${s}/${filename}`;
     const htmlPut = await put(htmlPath, html, {
       access: 'public',
       contentType: 'text/html; charset=utf-8',
+      // (dejamos el nombre tal cual; no hace falta forzar sin sufijo)
     });
 
-    // 2) latest.json
+    // 4) Actualizar puntero latest.json SIN sufijo
     const latestPath = `sites/${s}/latest.json`;
     const latestBody = JSON.stringify({
       url: htmlPut.url,
       updatedAt: new Date().toISOString(),
-      mode: MODE
-    });
-    const latestPut = await put(latestPath, latestBody, {
-      access: 'public',
-      contentType: 'application/json; charset=utf-8',
+      mode: MODE,
     });
 
-    const env = process.env.VERCEL_ENV || 'production'; // 'production' | 'preview' | 'development'
+    await put(latestPath, latestBody, {
+      access: 'public',
+      contentType: 'application/json; charset=utf-8',
+      addRandomSuffix: false, // <<--- CLAVE: que quede exactamente latest.json
+    });
+
+    // 5) Respuesta
+    const env = process.env.VERCEL_ENV || 'production';
     const published_url = `https://${s}.psicofunnel.online`;
 
     return NextResponse.json({
@@ -69,10 +76,9 @@ export async function POST(req: Request) {
       env,
       published_url,
       blob: htmlPut.url,
-      latest_url: latestPut.url
+      latest_url: `${process.env.BLOB_PUBLIC_BASE}/sites/${s}/latest.json`,
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ ok: false, error: 'Publish failed' }, { status: 500 });
   }
 }
-
