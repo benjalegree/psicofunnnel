@@ -1,8 +1,6 @@
 // app/api/publish/route.ts
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
-
-// Para Node runtime (put usa fs/streams si hace falta)
 export const runtime = 'nodejs';
 
 type PublishBody = {
@@ -13,7 +11,6 @@ type PublishBody = {
 };
 
 function sha1(str: string) {
-  // Hash corto para versionar el nombre del archivo (evita colisiones)
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
   // @ts-ignore
@@ -25,13 +22,11 @@ export async function POST(req: Request) {
   try {
     const { key, slug, html, mode }: PublishBody = await req.json();
 
-    // 1) Autorización básica por clave
     const PUBLISH_KEY = process.env.PUBLISH_KEY;
     if (!PUBLISH_KEY || key !== PUBLISH_KEY) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2) Validación de payload
     const s = (slug || '').trim().toLowerCase();
     if (!s || !/^[a-z0-9-]+$/.test(s)) {
       return NextResponse.json({ ok: false, error: 'Invalid slug' }, { status: 400 });
@@ -45,32 +40,39 @@ export async function POST(req: Request) {
     const hash = sha1(html + now);
     const filename = `index-${hash}.html`;
 
-    // 3) Sube la versión HTML a Blob público
-    //    Ruta: sites/<slug>/<filename>
+    // 1) Sube HTML
     const htmlPath = `sites/${s}/${filename}`;
     const htmlPut = await put(htmlPath, html, {
       access: 'public',
       contentType: 'text/html; charset=utf-8',
     });
 
-    // 4) Actualiza puntero latest.json
+    // 2) latest.json
     const latestPath = `sites/${s}/latest.json`;
-    const latestBody = JSON.stringify({ url: htmlPut.url, updatedAt: new Date().toISOString(), mode: MODE });
-    await put(latestPath, latestBody, {
+    const latestBody = JSON.stringify({
+      url: htmlPut.url,
+      updatedAt: new Date().toISOString(),
+      mode: MODE
+    });
+    const latestPut = await put(latestPath, latestBody, {
       access: 'public',
       contentType: 'application/json; charset=utf-8',
     });
 
-    // 5) Devuelve URL limpia por subdominio
+    const env = process.env.VERCEL_ENV || 'production'; // 'production' | 'preview' | 'development'
     const published_url = `https://${s}.psicofunnel.online`;
+
     return NextResponse.json({
       ok: true,
       status: 200,
       mode: MODE,
+      env,
       published_url,
       blob: htmlPut.url,
+      latest_url: latestPut.url
     });
   } catch (err: any) {
     return NextResponse.json({ ok: false, error: 'Publish failed' }, { status: 500 });
   }
 }
+
