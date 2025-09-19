@@ -9,5 +9,5 @@ Env vars (Vercel):
 - `BLOB_READ_WRITE_TOKEN`
 - `APPS_SCRIPT_ENDPOINT` (opcional)
 
-Domains:
+Domains:xcx
 - apex, www (redirect), wildcard `*.`m,m,mmkl
