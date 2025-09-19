@@ -1,41 +1,48 @@
 // app/s/[slug]/route.ts
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // o 'edge' si lo prefieres (usa fetch igual)
 
-/**
- * Sirve una landing publicada.
- * Si viene ?u= (URL del Blob) lo usa directo.
- * Si no, intenta resolver la última URL publicada desde Apps Script (Projects).
- */
-export async function GET(req: Request, ctx: { params: { slug: string } }) {
-  const { slug } = ctx.params;
-  const url = new URL(req.url);
-  const u = url.searchParams.get('u');
+const BLOB_BASE = process.env.BLOB_PUBLIC_BASE; // p.ej. https://m2skrbqmbxvdkbac.public.blob.vercel-storage.com
 
-  const cleaned = String(slug||'').trim().toLowerCase();
-  if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/.test(cleaned)) {
-    return new Response('Invalid slug', { status: 400 });
-  }
-
-  let blobUrl = u || '';
-
-  // Resolver desde Apps Script si no vino ?u=
-  if (!blobUrl) {
-    const endpoint = process.env.APPS_SCRIPT_ENDPOINT;
-    if (!endpoint) return new Response('Missing env', { status: 500 });
-    const info = await fetch(`${endpoint}?action=projectInfo&slug=${encodeURIComponent(cleaned)}`);
-    const txt = await info.text();
-    let data:any; try{ data = JSON.parse(txt) }catch{}
-    blobUrl = data?.last_published_url || data?.blob || '';
-    if (!blobUrl) return new Response('Not found', { status: 404 });
-  }
-
+export async function GET(_req: Request, { params }: { params: { slug: string } }) {
   try {
-    const resp = await fetch(blobUrl, { cache: 'no-store' });
-    const html = await resp.text();
+    if (!BLOB_BASE) {
+      return new Response('BLOB_PUBLIC_BASE is not configured', { status: 500 });
+    }
+
+    const slug = (params.slug || '').trim().toLowerCase();
+    if (!slug) {
+      return new Response('Missing slug', { status: 400 });
+    }
+
+    // 1) Lee el puntero "latest"
+    const latestUrl = `${BLOB_BASE}/sites/${encodeURIComponent(slug)}/latest.json`;
+    const metaRes = await fetch(latestUrl, { cache: 'no-store' });
+
+    if (!metaRes.ok) {
+      return new Response('Site not found', { status: 404 });
+    }
+
+    const { url } = await metaRes.json() as { url?: string };
+    if (!url) {
+      return new Response('Invalid metadata', { status: 502 });
+    }
+
+    // 2) Descarga el HTML actual
+    const htmlRes = await fetch(url, { cache: 'no-store' });
+    if (!htmlRes.ok) {
+      return new Response('Version not available', { status: 502 });
+    }
+    const html = await htmlRes.text();
+
+    // 3) Sirve HTML
     return new Response(html, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        // cachea un poquito si quieres
+        'Cache-Control': 'public, max-age=60',
+      },
     });
-  } catch (e:any) {
-    return new Response('Failed to load content', { status: 502 });
+  } catch (err) {
+    return new Response('Internal error', { status: 500 });
   }
 }
