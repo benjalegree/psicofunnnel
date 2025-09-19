@@ -1,38 +1,31 @@
 // middleware.ts
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Dominios base donde querés subdominios
-const BASES = new Set(['psicofunnel.online']);
-// Slugs válidos: minúsculas, números y guiones (DNS-safe)
-const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/;
+const ROOT_DOMAIN = 'psicofunnel.online';
+const RESERVED = new Set(['', 'www', 'blog', 'api']); // ajusta los que quieras reservar
 
 export function middleware(req: NextRequest) {
-  const url = req.nextUrl;
-  const host = req.headers.get('host') || '';
-  const p = url.pathname;
+  const host = req.headers.get('host') || '';         // ej: demo.psicofunnel.online
+  const parts = host.split('.');
+  const isApex = host === ROOT_DOMAIN;
 
-  // Deja pasar API y rutas canónicas
-  if (p.startsWith('/api')) return NextResponse.next();
-  if (p.startsWith('/s/')) return NextResponse.next();
-  if (p.startsWith('/preview/')) return NextResponse.next();
+  // sub = "demo" si host es "demo.psicofunnel.online"
+  const sub = (!isApex && parts.length >= 3) ? parts[0] : '';
 
-  // No forzar en dominios de preview de Vercel
-  if (host.endsWith('.vercel.app')) return NextResponse.next();
+  // si es subdominio “libre”, reescribo a /s/[slug]
+  if (sub && !RESERVED.has(sub)) {
+    const url = req.nextUrl.clone();
 
-  // Reescritura de subdominio → /s/{slug}
-  const labels = host.split('.');
-  if (labels.length >= 3) {
-    const base = labels.slice(-2).join('.'); // ej: psicofunnel.online
-    if (BASES.has(base)) {
-      let candidate = labels[0] === 'www' ? labels[1] : labels[0];
-      if (SLUG.test(candidate) && !['www','api','crm','preview','s'].includes(candidate)) {
-        const to = url.clone();
-        to.pathname = `/s/${candidate}`;
-        return NextResponse.rewrite(to);
-      }
+    // Solo para raíz (y raíz con index), deja pasar assets/otras rutas si las usas
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+      url.pathname = `/s/${sub}`;
+      return NextResponse.rewrite(url);
     }
   }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/', '/:path*'],
+};
