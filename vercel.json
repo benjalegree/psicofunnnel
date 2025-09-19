@@ -1,4 +1,7 @@
 {
+  "framework": "nextjs",
+  "buildCommand": "npm ci || npm install && npm run vercel-build",
+  "outputDirectory": ".next",
   "redirects": [
     {
       "source": "https://www.psicofunnel.online/:path*",
