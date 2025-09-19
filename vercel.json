@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "https://www.psicofunnel.online/:path*",
+      "destination": "https://psicofunnel.online/:path*",
+      "permanent": true
+    }
+  ]
+}
