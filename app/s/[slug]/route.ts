@@ -1,10 +1,10 @@
 // app/s/[slug]/route.ts
-// Lector robusto de "latest": soporta latest.json fijo o latest-*.json con sufijo.
+// Lector robusto: soporta latest.json fijo o latest-*.json con sufijo.
 import { list } from '@vercel/blob';
 
 export const runtime = 'nodejs';
 
-const BLOB_BASE = process.env.BLOB_PUBLIC_BASE;       // p.ej. https://XYZ.public.blob.vercel-storage.com
+const BLOB_BASE = process.env.BLOB_PUBLIC_BASE;       // ej: https://<id>.public.blob.vercel-storage.com
 const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN; // necesario para list()
 
 export async function GET(_req: Request, { params }: { params: { slug: string } }) {
@@ -30,9 +30,9 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
       if (!listed.blobs.length) return new Response('Site not found', { status: 404 });
 
       listed.blobs.sort((a, b) => {
-        const ta = new Date(a.uploadedAt || a.lastModified || 0).getTime();
-        const tb = new Date(b.uploadedAt || b.lastModified || 0).getTime();
-        return tb - ta;
+        const ta = new Date(a.uploadedAt || 0).getTime();
+        const tb = new Date(b.uploadedAt || 0).getTime();
+        return tb - ta; // descendente
       });
 
       const latestBlob = listed.blobs.find(b => b.pathname.startsWith(`sites/${slug}/latest`));
@@ -63,4 +63,3 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
     return new Response('Internal error', { status: 500 });
   }
 }
-
