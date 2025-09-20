@@ -1,14 +1,14 @@
 // app/api/publish/route.ts
 import { NextResponse } from 'next/server';
-import { put, list, del } from '@vercel/blob';
+import { put } from '@vercel/blob';
 
-// Opcional: cambia el prefijo si querés
 const ROOT_PREFIX = 'sites';
 
 export async function POST(req: Request) {
   try {
     const { slug, html, mode } = await req.json() as { slug?: string; html?: string; mode?: 'publish' | 'draft' };
 
+    // Validaciones
     if (!slug || !/^[a-z0-9-]{2,}$/.test(slug)) {
       return NextResponse.json({ ok:false, error:'Bad slug' }, { status: 400 });
     }
@@ -19,22 +19,28 @@ export async function POST(req: Request) {
     const safeSlug = slug.toLowerCase();
     const stamp = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 
-    // 1) Subir versión con nombre único
+    // 1) Subir versión única del HTML
     const filePath = `${ROOT_PREFIX}/${safeSlug}/index-${stamp}.html`;
-    const { url: blob } = await put(filePath, new Blob([html], { type: 'text/html;charset=utf-8' }), {
-      access: 'public',
-      addRandomSuffix: false
-    });
+    const { url: blob } = await put(
+      filePath,
+      new Blob([html], { type: 'text/html;charset=utf-8' }),
+      { access: 'public', addRandomSuffix: false }
+    );
 
-    // 2) Actualizar puntero latest.json
+    // 2) Guardar puntero latest.json con formato esperado
     const latestPath = `${ROOT_PREFIX}/${safeSlug}/latest.json`;
-    const latestPayload = JSON.stringify({ html: blob, ts: Date.now(), mode: mode || 'publish' });
-    await put(latestPath, new Blob([latestPayload], { type: 'application/json' }), {
-      access: 'public',
-      addRandomSuffix: false
+    const latestPayload = JSON.stringify({
+      url: blob,                 // la URL del HTML real
+      timestamp: Date.now(),     // cuándo se publicó
+      mode: mode || 'publish'
     });
+    await put(
+      latestPath,
+      new Blob([latestPayload], { type: 'application/json' }),
+      { access: 'public', addRandomSuffix: false }
+    );
 
-    // 3) URL del subdominio (tu dominio en Vercel DNS)
+    // 3) URL pública en tu subdominio
     const published_url = `https://${safeSlug}.psicofunnel.online`;
 
     return NextResponse.json({
