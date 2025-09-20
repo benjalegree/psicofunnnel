@@ -81,13 +81,13 @@ body{
   transition:transform .1s ease, background .2s ease;
   font-size:12px;
 }
-.pill:hover{transform:translateY(-1px); background:#fff}
+.pill:hover{transform:translateY(-2px); background:#fff}
 .hint{color:var(--muted); font-size:14px}
 hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),rgba(14,165,233,.18)); margin:28px 0}
 
 /* Nav */
 .nav{
-  position:sticky; top:0; z-index:50; height:var(--nav-h);
+  position:sticky; top:0; z-index:60; height:var(--nav-h);
   display:flex; align-items:center; backdrop-filter:saturate(1.2) blur(14px);
   -webkit-backdrop-filter:saturate(1.2) blur(14px);
   border-bottom:1px solid rgba(11,95,255,.08);
@@ -112,8 +112,29 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
   text-decoration:none; color:inherit;
 }
 .tab.active{background:linear-gradient(135deg,rgba(11,95,255,.15), rgba(14,165,233,.15)); color:#0b3aa6}
+
+/* Login area */
 .login{display:flex; align-items:center; gap:10px; margin-left:10px}
-.logged #loginStatus{color:var(--success); font-weight:700}
+#btnGoogleContainer{display:flex; align-items:center; gap:10px}
+.logged #btnGoogleContainer{display:none}
+#loginStatus{color:#475569; font-size:12px}
+#profile{display:none; align-items:center; gap:10px; position:relative}
+.logged #profile{display:flex}
+.avatar{
+  width:34px;height:34px;border-radius:999px;overflow:hidden;border:1px solid rgba(11,95,255,.18);
+  box-shadow:0 8px 18px rgba(2,6,23,.1); background:#fff
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.menu{
+  position:absolute; right:0; top:42px; display:none; min-width:180px;
+  background:rgba(255,255,255,.9); backdrop-filter: blur(10px);
+  border:1px solid rgba(11,95,255,.18); border-radius:14px; box-shadow:0 16px 40px rgba(2,6,23,.16); padding:8px;
+}
+.menu a, .menu button{
+  all:unset; display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer; font-size:13px;
+}
+.menu a:hover, .menu button:hover{ background:rgba(14,165,233,.12) }
+#profile.open .menu{display:block}
 
 /* Header */
 .header-hero{ padding:30px 0 16px; text-align:center; }
@@ -190,11 +211,54 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
 .modal{ position: fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:90; }
 .modal.active{display:flex}
 .modal .scrim{position:absolute; inset:0; background:rgba(2,6,23,.35); backdrop-filter: blur(6px)}
+
+/* Dialog base */
 .dialog{
-  position:relative; width:min(720px, 96vw); max-height:86vh; overflow:auto; padding:16px;
-  border-radius:var(--radius-2xl); box-shadow:var(--shadow-lg); background:rgba(255,255,255,.9);
-  border:1px solid rgba(11,95,255,.25);
+  position:relative; width:min(760px, 96vw); max-height:86vh; overflow:auto; padding:0;
+  border-radius:20px; box-shadow:var(--shadow-lg); background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.86));
+  border:1px solid rgba(11,95,255,.2);
 }
+
+/* BRIEF modal pro */
+.brief-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px;
+  border-bottom:1px solid rgba(11,95,255,.12);
+  background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.6));
+  position:sticky; top:0; z-index:1;
+}
+.brief-title{ display:flex; flex-direction:column; gap:4px }
+.brief-title .badge{ align-self:flex-start }
+.brief-title h2{ margin:0; font-size:20px; letter-spacing:-.02em }
+.brief-body{ padding:14px; display:grid; gap:12px }
+.form-grid{
+  display:grid; gap:12px; grid-template-columns: 1fr 1fr;
+}
+.form-grid .full{ grid-column: 1 / -1; }
+.label{ display:block; font-size:12px; color:#64748b; margin-bottom:6px; }
+.input-txt, .input-num, .input-sel{
+  width:100%; background: rgba(255,255,255,.75); border:1px solid rgba(11,95,255,.16);
+  color:#0b1220; border-radius:10px; padding:10px 12px; outline:none; font-size:13px;
+}
+.row-colors{
+  display:grid; gap:10px; grid-template-columns: 1fr 1fr;
+  background: rgba(255,255,255,.6); border:1px solid rgba(11,95,255,.12); border-radius:12px; padding:10px;
+}
+.swatches{ display:flex; flex-wrap:wrap; gap:8px }
+.swatch{
+  display:flex; border:1px solid rgba(11,95,255,.16); border-radius:12px; overflow:hidden; cursor:pointer; box-shadow:var(--shadow-sm);
+}
+.swatch .c{ width:26px; height:26px }
+.swatch .meta{ font-size:11px; padding:6px 8px; color:#334155; background:#fff }
+
+.pickers{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.pickers .picker{
+  display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.7);
+  border:1px solid rgba(11,95,255,.14); padding:8px 10px; border-radius:10px;
+}
+.picker input[type="color"]{
+  width:28px; height:28px; border:0; background:none; padding:0; appearance:none;
+}
+.brief-actions{ display:flex; gap:8px; justify-content:flex-end; padding:12px; border-top:1px solid rgba(11,95,255,.12); background:rgba(255,255,255,.65); }
 
 /* Preview modal */
 .preview-modal .sheet{
@@ -237,8 +301,18 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
         <a class="tab" role="tab" href="/publish-tester" id="navDominio" title="Configurar dominio">Dominio</a>
       </div>
       <div class="login">
-        <div id="btnGoogle"></div>
-        <span class="hint" id="loginStatus">No has iniciado sesión</span>
+        <div id="btnGoogleContainer">
+          <div id="btnGoogle"></div>
+          <span id="loginStatus">No has iniciado sesión</span>
+        </div>
+        <div id="profile">
+          <div class="avatar"><img id="avatarImg" alt="Perfil"></div>
+          <div class="menu" id="profileMenu" role="menu" aria-label="Menú de usuario">
+            <a href="/crm">Leads</a>
+            <a href="/publish-tester">Dominio</a>
+            <button id="logoutBtn">Cerrar sesión</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -247,7 +321,7 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
   <div class="modal" id="loginModal" aria-hidden="true" role="dialog">
     <div class="scrim" data-close-login></div>
     <div class="dialog glass" style="max-width:560px">
-      <div style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:6px">
+      <div style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:16px">
         <div class="logo" aria-hidden="true"></div>
         <h2 style="margin:0; font-size:20px; letter-spacing:-.02em">Inicia sesión para continuar</h2>
         <p class="hint" style="margin:0">Conéctate con Google para generar tu landing y asociarla a tu cuenta.</p>
@@ -347,62 +421,80 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
     </div>
   </section>
 
-  <!-- MODAL BRIEF (onboarding) -->
+  <!-- MODAL BRIEF (onboarding mejorado) -->
   <div class="modal" id="briefModal" aria-hidden="true" aria-labelledby="briefTitle" role="dialog">
     <div class="scrim" data-close></div>
     <div class="dialog">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px">
-        <div>
-          <div class="badge">Brief inicial</div>
-          <h2 id="briefTitle" style="margin:8px 0 2px; font-size:20px">Contanos tu marca</h2>
-          <div class="hint" style="font-size:13px">Estos datos se usarán como base para tus landings y para tu subdominio.</div>
+      <div class="brief-head">
+        <div class="brief-title">
+          <span class="badge">Brief inicial</span>
+          <h2 id="briefTitle">Contanos tu marca</h2>
+          <div class="hint" style="font-size:12px">Estos datos se usarán como base para tus landings y para tu subdominio.</div>
         </div>
         <button class="btn ghost" data-close aria-label="Cerrar">Cerrar</button>
       </div>
-      <form id="briefForm" class="form-grid">
-        <div>
-          <label class="label">Nombre de marca</label>
-          <input class="input-txt" name="brand_name" required placeholder="Ej. PsicoFunnel">
-        </div>
-        <div>
-          <label class="label">Nicho</label>
-          <input class="input-txt" name="niche" placeholder="Ej. Coaching de hábitos">
-        </div>
-        <div>
-          <label class="label">Objetivo</label>
-          <input class="input-txt" name="goal" placeholder="Ej. Captar leads para sesión diagnóstica">
-        </div>
-        <div>
-          <label class="label">Tono</label>
-          <input class="input-txt" name="tone" placeholder="Ej. Positivo, claro, sin promesas vacías">
-        </div>
-        <div class="full" style="display:flex; gap:8px; align-items:center">
+      <div class="brief-body">
+        <form id="briefForm" class="form-grid">
+          <div class="full">
+            <label class="label">Nombre de marca</label>
+            <input class="input-txt" name="brand_name" required placeholder="Ej. PsicoFunnel">
+          </div>
+
           <div>
-            <label class="label">Color primario</label>
-            <input class="input-txt" name="color_primary" value="#0ea5e9">
+            <label class="label">Nicho</label>
+            <input class="input-txt" name="niche" placeholder="Ej. Coaching de hábitos">
           </div>
           <div>
-            <label class="label">Color acento</label>
-            <input class="input-txt" name="color_accent" value="#0b5fff">
+            <label class="label">Objetivo</label>
+            <input class="input-txt" name="goal" placeholder="Ej. Captar leads para sesión diagnóstica">
           </div>
-          <div style="flex:1">
+
+          <div>
+            <label class="label">Tono</label>
+            <input class="input-txt" name="tone" placeholder="Ej. Positivo, claro, sin promesas vacías">
+          </div>
+          <div>
             <label class="label">Estilo / keywords</label>
             <input class="input-txt" name="style_keywords" placeholder="liquid glass, minimalista, premium">
           </div>
-        </div>
-        <div>
-          <label class="label">Precio (opcional)</label>
-          <input class="input-num" type="number" min="0" step="1" name="offer_price" placeholder="49">
-        </div>
-        <div>
-          <label class="label">Garantía (opcional)</label>
-          <input class="input-txt" name="offer_guarantee" placeholder="Garantía 7 días">
-        </div>
-        <div class="full" style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px">
-          <button type="button" class="btn ghost" id="briefReset">Reset</button>
-          <button type="submit" class="btn">Guardar</button>
-        </div>
-      </form>
+
+          <div class="full row-colors">
+            <div>
+              <div class="label" style="margin-bottom:8px">Paletas sugeridas</div>
+              <div class="swatches" id="swatches"></div>
+            </div>
+            <div>
+              <div class="label" style="margin-bottom:8px">Personalizar colores</div>
+              <div class="pickers">
+                <div class="picker">
+                  <span style="font-size:12px;color:#64748b">Primario</span>
+                  <input type="color" id="colorPrimaryPicker" value="#0ea5e9">
+                  <input class="input-txt" name="color_primary" id="colorPrimaryText" value="#0ea5e9" style="width:110px">
+                </div>
+                <div class="picker">
+                  <span style="font-size:12px;color:#64748b">Acento</span>
+                  <input type="color" id="colorAccentPicker" value="#0b5fff">
+                  <input class="input-txt" name="color_accent" id="colorAccentText" value="#0b5fff" style="width:110px">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="label">Precio (opcional)</label>
+            <input class="input-num" type="number" min="0" step="1" name="offer_price" placeholder="49">
+          </div>
+          <div>
+            <label class="label">Garantía (opcional)</label>
+            <input class="input-txt" name="offer_guarantee" placeholder="Garantía 7 días">
+          </div>
+
+          <div class="full brief-actions">
+            <button type="button" class="btn ghost" id="briefReset">Reset</button>
+            <button type="submit" class="btn">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -439,6 +531,7 @@ const CLIENT_ID = "668657005630-cljvl7bjqt10iim27aptl60bjqibn5vl.apps.googleuser
 let ID_TOKEN = null;
 let USER_EMAIL = null;
 let USER_NAME = null;
+let USER_PIC = null;
 
 const $ = (s,el=document)=>el.querySelector(s);
 const $$ = (s,el=document)=>Array.from(el.querySelectorAll(s));
@@ -467,6 +560,27 @@ async function apiWhoAmI(idToken){
   u.searchParams.set('id_token', idToken);
   const r = await fetch(u); return r.json();
 }
+/* Guarda/actualiza el usuario en tu Excel (Apps Script) */
+async function saveUserToCRM({ idToken, email, name, source = 'home_login' }) {
+  try {
+    const res = await fetch(CRM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify({
+        action: 'upsertuser',
+        id_token: idToken,
+        email, // opcional (el script usa el token)
+        name,
+        source,
+        ts: Date.now()
+      })
+    });
+    const j = await res.json().catch(() => ({}));
+    return j;
+  } catch (e) {
+    return { ok: false, error: String(e?.message || e) };
+  }
+}
 
 /* ==== stores ==== */
 const BriefStore = {
@@ -486,12 +600,19 @@ const Onboarding = {
   get(){ return localStorage.getItem(this.key)==='true' },
   set(){ localStorage.setItem(this.key,'true') }
 };
-const RecentStore = {
-  key: 'pf_recent_sites_v1',
-  list(){ try { return JSON.parse(localStorage.getItem(this.key)||'[]') } catch { return [] } },
-  push(item){ const arr = this.list(); arr.unshift(item); localStorage.setItem(this.key, JSON.stringify(arr.slice(0,12))); }
-};
-const SessionHTML = new Map();
+/* Landings persistentes para Home + Publish Tester */
+const LS_LANDINGS = 'pf_landings';
+function readLandings(){ try { return JSON.parse(localStorage.getItem(LS_LANDINGS) || '[]'); } catch { return []; } }
+function writeLandings(list){ localStorage.setItem(LS_LANDINGS, JSON.stringify(list || [])); }
+function addLandingToLocal({ id, title, html, code }){
+  const list = readLandings();
+  const i = list.findIndex(x => x.id === id);
+  const entry = { id, title, html, code };
+  if (i >= 0) list[i] = { ...list[i], ...entry };
+  else list.unshift(entry);
+  writeLandings(list);
+  return list;
+}
 
 /* ==== UI refs ==== */
 const healthBadge = $('#healthBadge');
@@ -501,6 +622,12 @@ const sendBtn = $('#send');
 const openBriefBtn = $('#openBrief');
 const loadDemoBtn = $('#loadDemo');
 const recentGrid = $('#recentGrid');
+
+/* Profile */
+const profile = $('#profile');
+const avatarImg = $('#avatarImg');
+const profileMenu = $('#profileMenu');
+const logoutBtn = $('#logoutBtn');
 
 /* Preview modal elems */
 const previewModal = $('#previewModal');
@@ -530,19 +657,25 @@ window.addEventListener('load', async () => {
     const t = localStorage.getItem('psico_id_token');
     const n = localStorage.getItem('psico_name');
     const e = localStorage.getItem('psico_email');
+    const p = localStorage.getItem('psico_pic');
     if(t){
       const w = await apiWhoAmI(t).catch(()=>({ok:false}));
       if(w.ok){
-        ID_TOKEN = t; USER_EMAIL = w.email || e || null; USER_NAME = n || null;
+        ID_TOKEN = t; USER_EMAIL = w.email || e || null; USER_NAME = n || null; USER_PIC = p || null;
+
         document.body.classList.add('logged');
         const ls = $('#loginStatus'); if(ls) ls.textContent = 'Conectado: ' + USER_EMAIL;
+        if(USER_PIC){ avatarImg.src = USER_PIC; }
+
+        // NEW: registrar/actualizar en Excel también en autologin
+        saveUserToCRM({ idToken: ID_TOKEN, email: USER_EMAIL, name: USER_NAME, source: 'home_autologin' });
 
         // Onboarding automático si nunca guardó marca/brief
         if(!BrandStore.exists() && !Onboarding.get()){
           setTimeout(()=> setModal(true), 300);
         }
       }else{
-        localStorage.removeItem('psico_id_token'); localStorage.removeItem('psico_email'); localStorage.removeItem('psico_name');
+        localStorage.removeItem('psico_id_token'); localStorage.removeItem('psico_email'); localStorage.removeItem('psico_name'); localStorage.removeItem('psico_pic');
       }
     }
   }catch(_){}
@@ -552,6 +685,7 @@ async function onGoogleSignIn(resp){
   const claims = decodeJwtPayload(resp.credential || '');
   USER_NAME  = claims.name || [claims.given_name, claims.family_name].filter(Boolean).join(' ') || null;
   USER_EMAIL = claims.email || null;
+  USER_PIC   = claims.picture || null;
 
   const ls = $('#loginStatus'); if(ls) ls.textContent = 'Verificando…';
   const w = await apiWhoAmI(resp.credential).catch(()=>({ok:false}));
@@ -562,11 +696,16 @@ async function onGoogleSignIn(resp){
   localStorage.setItem('psico_id_token', ID_TOKEN);
   if(USER_EMAIL) localStorage.setItem('psico_email', USER_EMAIL);
   if(USER_NAME)  localStorage.setItem('psico_name', USER_NAME);
+  if(USER_PIC)   localStorage.setItem('psico_pic', USER_PIC);
 
   document.body.classList.add('logged');
   if(ls) ls.textContent = 'Conectado: ' + USER_EMAIL;
   const lsm = $('#loginStatusModal'); if(lsm) lsm.textContent = 'Conectado: ' + USER_EMAIL;
+  if(USER_PIC){ avatarImg.src = USER_PIC; }
   setLoginModal(false);
+
+  // NEW: persistir usuario en Excel al iniciar sesión
+  saveUserToCRM({ idToken: ID_TOKEN, email: USER_EMAIL, name: USER_NAME, source: 'home_login' });
 
   // Si es la primera vez → abrir brief
   if(!BrandStore.exists() && !Onboarding.get()){
@@ -579,6 +718,22 @@ function ensureLogged(){
   setLoginModal(true);
   return false;
 }
+
+/* ==== Profile menu ==== */
+profile?.addEventListener('click', (e)=>{
+  profile.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(profile && !profile.contains(e.target)) profile.classList.remove('open');
+});
+logoutBtn?.addEventListener('click', ()=>{
+  try{ google?.accounts?.id?.disableAutoSelect?.(); }catch(_){}
+  localStorage.removeItem('psico_id_token');
+  localStorage.removeItem('psico_email');
+  localStorage.removeItem('psico_name');
+  localStorage.removeItem('psico_pic');
+  location.href = '/';
+});
 
 /* ==== Plantillas / Chips ==== */
 $('#templates').addEventListener('click', (e)=>{
@@ -596,19 +751,56 @@ $('#chips').addEventListener('click', (e)=>{
   composer.focus();
 });
 
+/* ==== Paletas de color ==== */
+const PRESETS = [
+  { name:'Azul Tech',   primary:'#0ea5e9', accent:'#0b5fff' },
+  { name:'Morado Pro',  primary:'#6d28d9', accent:'#8b5cf6' },
+  { name:'Navy Clean',  primary:'#0ea5e9', accent:'#0b3aa6' },
+  { name:'Verde Trust', primary:'#10b981', accent:'#0ea5e9' },
+  { name:'Naranja Go',  primary:'#f59e0b', accent:'#f97316' },
+  { name:'Rose Brand',  primary:'#ec4899', accent:'#a855f7' }
+];
+function renderSwatches(){
+  const box = $('#swatches'); if(!box) return;
+  box.innerHTML='';
+  PRESETS.forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'swatch';
+    el.innerHTML = `<div class="c" style="background:${p.primary}"></div><div class="c" style="background:${p.accent}"></div><div class="meta">${p.name}</div>`;
+    el.addEventListener('click', ()=>{
+      const pPick = $('#colorPrimaryPicker'), aPick = $('#colorAccentPicker');
+      const pTxt  = $('#colorPrimaryText'),   aTxt  = $('#colorAccentText');
+      if(pPick) pPick.value = p.primary;
+      if(aPick) aPick.value = p.accent;
+      if(pTxt)  pTxt.value  = p.primary;
+      if(aTxt)  aTxt.value  = p.accent;
+    });
+    box.appendChild(el);
+  });
+}
+function hookPickers(){
+  const pPick = $('#colorPrimaryPicker'), aPick = $('#colorAccentPicker');
+  const pTxt  = $('#colorPrimaryText'),   aTxt  = $('#colorAccentText');
+  pPick?.addEventListener('input', ()=>{ if(pTxt) pTxt.value = pPick.value; });
+  aPick?.addEventListener('input', ()=>{ if(aTxt) aTxt.value = aPick.value; });
+  pTxt?.addEventListener('input', ()=>{ if(pPick && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(pTxt.value)) pPick.value = pTxt.value; });
+  aTxt?.addEventListener('input', ()=>{ if(aPick && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(aTxt.value)) aPick.value = aTxt.value; });
+}
+
 /* ==== Brief modal ==== */
 openBriefBtn.addEventListener('click', ()=>{
   if(!ensureLogged()){ addMsg('system','Inicia sesión para completar tu brief.'); return; }
   const saved = BriefStore.get() || {};
   const modal = $('#briefModal');
   $$('[name]', modal).forEach(inp=>{ const k=inp.name; if(saved[k]!=null) inp.value = saved[k]; });
-  // Si hay marca guardada, precargar brand_name
   const b = BrandStore.get(); if(b?.name){ $("[name='brand_name']", modal).value = b.name; }
+  renderSwatches(); hookPickers();
   setModal(true);
 });
 document.addEventListener('click', (e)=>{ if(e.target.closest('[data-close]')) setModal(false); });
 $('#briefReset').addEventListener('click', ()=>{
   const modal = $('#briefModal'); BriefStore.reset(); $$('[name]', modal).forEach(inp=> inp.value = '');
+  renderSwatches(); hookPickers();
 });
 $('#briefForm').addEventListener('submit', (e)=>{
   e.preventDefault();
@@ -619,10 +811,11 @@ $('#briefForm').addEventListener('submit', (e)=>{
   // Guardar brief
   BriefStore.set(data);
 
-  // Guardar marca (una sola vez por usuario)
+  // Guardar marca (una sola vez por usuario) / actualizar nombre mantiene el mismo slug si ya existía
   const name = String(data.brand_name||'').trim();
   if(name){
-    const slug = slugify(name);
+    const prev = BrandStore.get();
+    const slug = prev?.slug || slugify(name);
     BrandStore.set({ name, slug });
   }
 
@@ -689,7 +882,7 @@ async function generateFromPrompt(){
   const thinking = addMsg('assistant', 'Generando tu funnel… ⏳');
 
   try{
-    // registro opcional
+    // registro opcional (slug del proyecto generado)
     try{
       await fetch(CRM_ENDPOINT, {
         method:'POST', headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
@@ -700,20 +893,26 @@ async function generateFromPrompt(){
     const html = await sendToMake(payload);
     thinking.remove();
 
+    // PREVIEW
     if(lastBlobURL) URL.revokeObjectURL(lastBlobURL);
     lastHTML = html;
     lastBlobURL = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
-    SessionHTML.set(project_slug, {html, blobURL:lastBlobURL});
-    RecentStore.push({ slug: project_slug, title: (brief.brand_name||'Marca') + ' — ' + (selectedTemplate?.name || 'custom'), ts: Date.now() });
-    renderRecents();
-
-    // Preview
-    previewFrame.removeAttribute('sandbox'); previewFrame.srcdoc = html;
+    previewFrame.removeAttribute('sandbox'); 
+    previewFrame.srcdoc = html;
     codeBox.textContent = html;
     $('#previewModal').classList.remove('show-code');
     setPreview(true);
 
-    addMsg('assistant', `Listo ✅ Abrí la preview para ver/descargar tu landing o andá a <a href="/publish-tester">Dominio</a> para publicarla como principal.`);
+    // NEW: persistir landing en pf_landings
+    const brand = BrandStore.get();
+    const id = `landing-${Date.now()}`;
+    const title = `${brand?.name || 'Mi marca'} — ${selectedTemplate?.name || 'custom'}`;
+    addLandingToLocal({ id, title, html });
+
+    // Re-pintar sección de recientes
+    renderRecents();
+
+    addMsg('assistant', `Listo ✅ Guardé tu landing. Podés verla en “Últimas landings” y publicarla desde <a href="/publish-tester">Dominio</a>.`);
     composer.value=''; selectedTemplate = null;
   }catch(err){
     thinking.textContent = 'Hubo un problema: ' + (err.message || err);
@@ -742,7 +941,7 @@ closePreviewBtn?.addEventListener('click', ()=> setPreview(false));
 
 /* recientes */
 function renderRecents(){
-  const arr = RecentStore.list();
+  const arr = readLandings();
   recentGrid.innerHTML = '';
   if(!arr.length){
     recentGrid.innerHTML = `<div class="card"><div class="k">Aún no hay landings</div><div class="hint">Cuando generes tu primera landing, aparecerá aquí.</div></div>`;
@@ -752,11 +951,11 @@ function renderRecents(){
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <div class="k">${it.title || 'Landing generada'}</div>
-      <div class="hint" style="margin:6px 0 8px">Slug: <strong>${it.slug}</strong> • Fecha: ${new Date(it.ts).toLocaleString()}</div>
+      <div class="k">${it.title || it.id}</div>
+      <div class="hint" style="margin:6px 0 8px">ID: <strong>${it.id}</strong></div>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
-        <button class="btn" data-open="${it.slug}">Abrir</button>
-        <button class="btn ghost" data-copy="${it.slug}">Copiar código</button>
+        <button class="btn" data-open="${it.id}">Abrir</button>
+        <button class="btn ghost" data-copy="${it.id}">Copiar código</button>
       </div>`;
     recentGrid.appendChild(card);
   });
@@ -765,15 +964,17 @@ recentGrid.addEventListener('click', async (e)=>{
   const open = e.target.closest('[data-open]');
   const copy = e.target.closest('[data-copy]');
   if(open){
-    const slug = open.getAttribute('data-open');
-    const item = SessionHTML.get(slug);
-    if(!item){ open.textContent='No disponible'; return; }
-    window.open(item.blobURL, '_blank', 'noopener');
+    const id = open.getAttribute('data-open');
+    const item = readLandings().find(x => x.id === id);
+    if(!item?.html){ open.textContent='No disponible'; return; }
+    const url = URL.createObjectURL(new Blob([item.html], {type:'text/html'}));
+    window.open(url, '_blank', 'noopener');
+    setTimeout(()=> URL.revokeObjectURL(url), 20000);
   }
   if(copy){
-    const slug = copy.getAttribute('data-copy');
-    const item = SessionHTML.get(slug);
-    if(!item){ copy.textContent='No disponible'; return; }
+    const id = copy.getAttribute('data-copy');
+    const item = readLandings().find(x => x.id === id);
+    if(!item?.html){ copy.textContent='No disponible'; return; }
     await navigator.clipboard.writeText(item.html);
     copy.textContent='¡Copiado!'; setTimeout(()=> copy.textContent='Copiar código', 1200);
   }
