@@ -1,98 +1,51 @@
-// PATCH_ID: ADD_RANDOM_SUFFIX_FALSE_v3
+// app/api/publish/route.ts
 import { NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 
-export const runtime = 'nodejs';
-
-type PublishBody = {
-  key?: string;
-  slug?: string;
-  html?: string;
-  mode?: 'publish' | 'draft';
-};
-
-function sha1(str: string) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  // @ts-ignore
-  const buf = require('crypto').createHash('sha1').update(data).digest('hex');
-  return buf.substring(0, 12);
-}
+// Opcional: cambia el prefijo si querés
+const ROOT_PREFIX = 'sites';
 
 export async function POST(req: Request) {
   try {
-    const { key, slug, html, mode }: PublishBody = await req.json();
+    const { slug, html, mode } = await req.json() as { slug?: string; html?: string; mode?: 'publish' | 'draft' };
 
-    // --- Auth simple
-    const PUBLISH_KEY = process.env.PUBLISH_KEY;
-    if (!PUBLISH_KEY || key !== PUBLISH_KEY) {
-      return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    if (!slug || !/^[a-z0-9-]{2,}$/.test(slug)) {
+      return NextResponse.json({ ok:false, error:'Bad slug' }, { status: 400 });
+    }
+    if (!html || !/^<!doctype html/i.test(html)) {
+      return NextResponse.json({ ok:false, error:'HTML required (<!doctype html ...)' }, { status: 400 });
     }
 
-    // --- Validaciones
-    const s = (slug || '').trim().toLowerCase();
-    if (!s || !/^[a-z0-9-]+$/.test(s)) {
-      return NextResponse.json({ ok: false, error: 'Invalid slug' }, { status: 400 });
-    }
-    if (!html || !html.toLowerCase().includes('<!doctype html')) {
-      return NextResponse.json({ ok: false, error: 'Expecting full HTML document' }, { status: 400 });
-    }
+    const safeSlug = slug.toLowerCase();
+    const stamp = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 
-    const MODE = (mode === 'draft' ? 'draft' : 'publish') as 'publish' | 'draft';
-    const now = new Date().toISOString().replace(/[:.]/g, '-');
-    const hash = sha1(html + now);
-    const filename = `index-${hash}.html`;
-
-    // --- Token de Blob (necesario para controlar addRandomSuffix)
-    const TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!TOKEN) {
-      return NextResponse.json({ ok: false, error: 'Missing BLOB_READ_WRITE_TOKEN' }, { status: 500 });
-    }
-
-    // 1) Subir HTML (la versión puede tener sufijo en la URL pública, no importa)
-    const htmlPath = `sites/${s}/${filename}`;
-    const htmlPut = await put(htmlPath, html, {
+    // 1) Subir versión con nombre único
+    const filePath = `${ROOT_PREFIX}/${safeSlug}/index-${stamp}.html`;
+    const { url: blob } = await put(filePath, new Blob([html], { type: 'text/html;charset=utf-8' }), {
       access: 'public',
-      contentType: 'text/html; charset=utf-8',
-      token: TOKEN,
-      // addRandomSuffix (por defecto true) — OK para versiones
+      addRandomSuffix: false
     });
 
-    // 2) Escribir/actualizar puntero fijo latest.json (SIN sufijo, nombre exacto)
-    const latestPath = `sites/${s}/latest.json`;
-    const latestBody = JSON.stringify({
-      url: htmlPut.url,
-      updatedAt: new Date().toISOString(),
-      mode: MODE,
-    });
-
-    await put(latestPath, latestBody, {
+    // 2) Actualizar puntero latest.json
+    const latestPath = `${ROOT_PREFIX}/${safeSlug}/latest.json`;
+    const latestPayload = JSON.stringify({ html: blob, ts: Date.now(), mode: mode || 'publish' });
+    await put(latestPath, new Blob([latestPayload], { type: 'application/json' }), {
       access: 'public',
-      contentType: 'application/json; charset=utf-8',
-      addRandomSuffix: false, // << clave: nombre EXACTO latest.json
-      token: TOKEN,           // << clave: necesario para que respete el nombre
+      addRandomSuffix: false
     });
 
-    // 3) Respuesta clara (latest_url SIEMPRE sin sufijo)
-    const env = process.env.VERCEL_ENV || 'production';
-    const base = process.env.BLOB_PUBLIC_BASE || '';
-    const latest_url = base
-      ? `${base}/sites/${s}/latest.json`
-      : 'BLOB_PUBLIC_BASE_NOT_SET';
-
-    const published_url = `https://${s}.psicofunnel.online`;
+    // 3) URL del subdominio (tu dominio en Vercel DNS)
+    const published_url = `https://${safeSlug}.psicofunnel.online`;
 
     return NextResponse.json({
       ok: true,
       status: 200,
-      mode: MODE,
-      env,
+      mode: mode || 'publish',
       published_url,
-      blob: htmlPut.url,
-      latest_url,
-      patch: 'ADD_RANDOM_SUFFIX_FALSE_v3',
+      blob,
+      latest_url: blob.replace(/index-[^/]+\.html$/, 'latest.json')
     });
-  } catch {
-    return NextResponse.json({ ok: false, error: 'Publish failed' }, { status: 500 });
+  } catch (e:any) {
+    return NextResponse.json({ ok:false, error: String(e?.message || e) }, { status: 500 });
   }
 }
