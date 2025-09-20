@@ -825,7 +825,7 @@ $('#briefForm').addEventListener('submit', (e)=>{
 });
 
 /* ==== Chat / generación ==== */
-const TIMEOUT_MS = 60000;
+const TIMEOUT_MS = 800000;
 function addMsg(role, html){
   const div = document.createElement('div');
   div.className = `msg ${role}`; div.innerHTML = html; pane.appendChild(div); pane.scrollTop = pane.scrollHeight; return div;
