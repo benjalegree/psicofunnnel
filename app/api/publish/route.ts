@@ -1,4 +1,4 @@
-// app/api/publish/route.ts
+// PATCH_ID: ADD_RANDOM_SUFFIX_FALSE_v3
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 
@@ -49,16 +49,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'Missing BLOB_READ_WRITE_TOKEN' }, { status: 500 });
     }
 
-    // 1) Subir HTML (puede ir con sufijo aleatorio, no importa)
+    // 1) Subir HTML (la versión puede tener sufijo en la URL pública, no importa)
     const htmlPath = `sites/${s}/${filename}`;
     const htmlPut = await put(htmlPath, html, {
       access: 'public',
       contentType: 'text/html; charset=utf-8',
       token: TOKEN,
-      // addRandomSuffix por defecto true (nos da URL única para la versión)
+      // addRandomSuffix (por defecto true) — OK para versiones
     });
 
-    // 2) Escribir puntero fijo latest.json (SIN sufijo)
+    // 2) Escribir/actualizar puntero fijo latest.json (SIN sufijo, nombre exacto)
     const latestPath = `sites/${s}/latest.json`;
     const latestBody = JSON.stringify({
       url: htmlPut.url,
@@ -69,14 +69,18 @@ export async function POST(req: Request) {
     await put(latestPath, latestBody, {
       access: 'public',
       contentType: 'application/json; charset=utf-8',
-      addRandomSuffix: false,       // << clave
-      token: TOKEN,                 // << clave
+      addRandomSuffix: false, // << clave: nombre EXACTO latest.json
+      token: TOKEN,           // << clave: necesario para que respete el nombre
     });
 
-    // 3) Respuesta
+    // 3) Respuesta clara (latest_url SIEMPRE sin sufijo)
     const env = process.env.VERCEL_ENV || 'production';
+    const base = process.env.BLOB_PUBLIC_BASE || '';
+    const latest_url = base
+      ? `${base}/sites/${s}/latest.json`
+      : 'BLOB_PUBLIC_BASE_NOT_SET';
+
     const published_url = `https://${s}.psicofunnel.online`;
-    const latest_url = `${process.env.BLOB_PUBLIC_BASE}/sites/${s}/latest.json`;
 
     return NextResponse.json({
       ok: true,
@@ -86,8 +90,9 @@ export async function POST(req: Request) {
       published_url,
       blob: htmlPut.url,
       latest_url,
+      patch: 'ADD_RANDOM_SUFFIX_FALSE_v3',
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ ok: false, error: 'Publish failed' }, { status: 500 });
   }
 }
