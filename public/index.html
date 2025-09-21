@@ -421,7 +421,7 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
     </div>
   </section>
 
-  <!-- MODAL BRIEF (onboarding mejorado) -->
+  <!-- MODAL BRIEF -->
   <div class="modal" id="briefModal" aria-hidden="true" aria-labelledby="briefTitle" role="dialog">
     <div class="scrim" data-close></div>
     <div class="dialog">
@@ -560,7 +560,6 @@ async function apiWhoAmI(idToken){
   u.searchParams.set('id_token', idToken);
   const r = await fetch(u); return r.json();
 }
-/* Guarda/actualiza el usuario en tu Excel (Apps Script) */
 async function saveUserToCRM({ idToken, email, name, source = 'home_login' }) {
   try {
     const res = await fetch(CRM_ENDPOINT, {
@@ -569,7 +568,7 @@ async function saveUserToCRM({ idToken, email, name, source = 'home_login' }) {
       body: JSON.stringify({
         action: 'upsertuser',
         id_token: idToken,
-        email, // opcional (el script usa el token)
+        email,
         name,
         source,
         ts: Date.now()
@@ -600,7 +599,6 @@ const Onboarding = {
   get(){ return localStorage.getItem(this.key)==='true' },
   set(){ localStorage.setItem(this.key,'true') }
 };
-/* Landings persistentes para Home + Publish Tester */
 const LS_LANDINGS = 'pf_landings';
 function readLandings(){ try { return JSON.parse(localStorage.getItem(LS_LANDINGS) || '[]'); } catch { return []; } }
 function writeLandings(list){ localStorage.setItem(LS_LANDINGS, JSON.stringify(list || [])); }
@@ -652,7 +650,6 @@ window.addEventListener('load', async () => {
     const btn = $('#btnGoogle'); if(btn) google.accounts.id.renderButton(btn, { theme:'outline', size:'medium', type:'standard', shape:'pill' });
     const btnM = $('#btnGoogleModal'); if(btnM) google.accounts.id.renderButton(btnM, { theme:'filled_blue', size:'large', type:'standard', shape:'pill', text:'signin_with' });
   }
-  // Reusar token
   try{
     const t = localStorage.getItem('psico_id_token');
     const n = localStorage.getItem('psico_name');
@@ -667,10 +664,8 @@ window.addEventListener('load', async () => {
         const ls = $('#loginStatus'); if(ls) ls.textContent = 'Conectado: ' + USER_EMAIL;
         if(USER_PIC){ avatarImg.src = USER_PIC; }
 
-        // NEW: registrar/actualizar en Excel también en autologin
         saveUserToCRM({ idToken: ID_TOKEN, email: USER_EMAIL, name: USER_NAME, source: 'home_autologin' });
 
-        // Onboarding automático si nunca guardó marca/brief
         if(!BrandStore.exists() && !Onboarding.get()){
           setTimeout(()=> setModal(true), 300);
         }
@@ -704,10 +699,8 @@ async function onGoogleSignIn(resp){
   if(USER_PIC){ avatarImg.src = USER_PIC; }
   setLoginModal(false);
 
-  // NEW: persistir usuario en Excel al iniciar sesión
   saveUserToCRM({ idToken: ID_TOKEN, email: USER_EMAIL, name: USER_NAME, source: 'home_login' });
 
-  // Si es la primera vez → abrir brief
   if(!BrandStore.exists() && !Onboarding.get()){
     setTimeout(()=> setModal(true), 300);
   }
@@ -788,6 +781,7 @@ function hookPickers(){
 }
 
 /* ==== Brief modal ==== */
+const openBriefBtn = document.getElementById('openBrief');
 openBriefBtn.addEventListener('click', ()=>{
   if(!ensureLogged()){ addMsg('system','Inicia sesión para completar tu brief.'); return; }
   const saved = BriefStore.get() || {};
@@ -808,10 +802,8 @@ $('#briefForm').addEventListener('submit', (e)=>{
   if(!validHex(data.color_primary)) data.color_primary = '#0ea5e9';
   if(!validHex(data.color_accent)) data.color_accent = '#0b5fff';
 
-  // Guardar brief
   BriefStore.set(data);
 
-  // Guardar marca (una sola vez por usuario) / actualizar nombre mantiene el mismo slug si ya existía
   const name = String(data.brand_name||'').trim();
   if(name){
     const prev = BrandStore.get();
@@ -825,8 +817,9 @@ $('#briefForm').addEventListener('submit', (e)=>{
 });
 
 /* ==== Chat / generación ==== */
-/* CUADRUPLICADO: timeout de espera de Make */
-const TIMEOUT_MS = 6000000; // 4× respecto al valor base solicitado
+/* Timeout TOTAL cuadruplicado + reintentos hasta recibir HTML completo */
+const TIMEOUT_MS = 60 * 60 * 1000; // 60 minutos
+
 function addMsg(role, html){
   const div = document.createElement('div');
   div.className = `msg ${role}`; div.innerHTML = html; pane.appendChild(div); pane.scrollTop = pane.scrollHeight; return div;
@@ -835,22 +828,72 @@ function validBrief(){
   const b = BriefStore.get();
   return b && b.brand_name && slugify(b.brand_name).length >= 2;
 }
+
+/* Fetch idempotente con reintentos (no lanza "no es HTML" ante respuestas intermedias) */
 async function sendToMake(payload){
-  const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort('timeout'), TIMEOUT_MS);
-  let r;
-  try{
-    r = await fetch(MAKE_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=UTF-8', 'Accept':'text/html' }, body: JSON.stringify(payload), signal: ctrl.signal });
-  }catch(e){
+  payload.request_id = payload.request_id || (crypto.randomUUID?.() || Math.random().toString(36).slice(2));
+
+  const started  = Date.now();
+  const deadline = started + TIMEOUT_MS;
+  let attempt = 0;
+
+  while (Date.now() < deadline) {
+    const remaining = deadline - Date.now();
+    const perAttemptMs = Math.min(180000, Math.max(30000, remaining)); // 30s–180s por intento
+
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort('timeout'), perAttemptMs);
+
+    let r, txt, ct;
+    try {
+      r = await fetch(MAKE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // enviamos JSON
+          'Accept': 'text/html',              // pedimos HTML final
+          'X-Idempotency-Key': payload.request_id
+        },
+        body: JSON.stringify(payload),
+        signal: ctrl.signal
+      });
+    } catch (e) {
+      clearTimeout(t);
+      if (e.name !== 'AbortError') {
+        try { document.querySelector('.msg.assistant:last-child')?.append?.(' · reconectando…'); } catch(_){}
+      }
+      await new Promise(res => setTimeout(res, 1500));
+      attempt++;
+      continue;
+    }
+
     clearTimeout(t);
-    if(e.name==='AbortError') throw new Error('Timeout del servidor (' + Math.round(TIMEOUT_MS/1000) + 's).');
-    throw new Error('No se pudo conectar: ' + e.message);
+
+    ct  = (r.headers.get('content-type') || '').toLowerCase();
+    txt = await r.text();
+
+    const looksHTML = ct.includes('text/html');
+    const startOk   = /^\s*<!doctype html/i.test(txt);
+    const endOk     = /<\/html>\s*$/i.test(txt);
+
+    if (r.ok && looksHTML && startOk && endOk) {
+      return txt;
+    }
+
+    // Respuesta intermedia o no-HTML: actualizar estado y reintentar
+    const thinking = document.querySelector('.msg.assistant:last-child');
+    if (thinking) {
+      const secs = Math.round((Date.now() - started) / 1000);
+      thinking.innerHTML = `Generando tu funnel… ⏳ <span class="hint">(llevamos ${secs}s, intento ${attempt + 1})</span>`;
+    }
+
+    const delay = Math.min(1000 + attempt * 1500, 10000); // 1s→10s
+    await new Promise(res => setTimeout(res, delay));
+    attempt++;
   }
-  clearTimeout(t);
-  const html = await r.text();
-  if(!r.ok) throw new Error('Status ' + r.status + '. ' + html.slice(0,200));
-  if(!/^\s*<!doctype html/i.test(html) || !/<\/html>\s*$/i.test(html)) throw new Error('La respuesta no es un HTML completo.');
-  return html;
+
+  throw new Error(`Timeout del servidor (${Math.round(TIMEOUT_MS/1000)}s).`);
 }
+
 function brandSlug(){
   const b = BrandStore.get(); if(b?.slug) return b.slug;
   const saved = BriefStore.get(); return slugify(saved?.brand_name || 'demo');
@@ -887,7 +930,6 @@ async function generateFromPrompt(){
   const thinking = addMsg('assistant', 'Generando tu funnel… ⏳');
 
   try{
-    // registro opcional (slug del proyecto generado)
     try{
       await fetch(CRM_ENDPOINT, {
         method:'POST', headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
@@ -898,23 +940,20 @@ async function generateFromPrompt(){
     const html = await sendToMake(payload);
     thinking.remove();
 
-    // PREVIEW
     if(lastBlobURL) URL.revokeObjectURL(lastBlobURL);
     lastHTML = html;
     lastBlobURL = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
-    previewFrame.removeAttribute('sandbox'); 
+    previewFrame.removeAttribute('sandbox');
     previewFrame.srcdoc = html;
     codeBox.textContent = html;
     $('#previewModal').classList.remove('show-code');
     setPreview(true);
 
-    // NEW: persistir landing en pf_landings
     const brand = BrandStore.get();
     const id = `landing-${Date.now()}`;
     const title = `${brand?.name || 'Mi marca'} — ${selectedTemplate?.name || 'custom'}`;
     addLandingToLocal({ id, title, html });
 
-    // Re-pintar sección de recientes
     renderRecents();
 
     addMsg('assistant', `Listo ✅ Guardé tu landing. Podés verla en “Últimas landings” y publicarla desde <a href="/publish-tester">Dominio</a>.`);
