@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="light">
 <style>
 /* =========================
-   PsicoFunnel — Estética base (copiada de Home)
+   PsicoFunnel — Estética base
    ========================= */
 :root{
   --bg:#f7f9fc;
@@ -30,10 +30,10 @@
   --shadow-md: 0 10px 30px rgba(2,6,23,.10);
   --shadow-sm: 0 6px 16px rgba(2,6,23,.08);
   --ring: 0 0 0 8px rgba(14,165,233,.15);
-  --ring-strong: 0 0 0 10px rgba(14,165,233,.22);
   --font: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   --nav-h: 68px;
-  --max-w: 1180px;
+  --max-w: 1440px;
+  --device-w: 1200px; /* cambia con los toggles */
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -44,39 +44,9 @@ body{
   background-image: var(--bg-grad);
   background-attachment: fixed;
 }
-.container{max-width:var(--max-w); margin:0 auto; padding:0 20px}
-.glass{
-  background:var(--card);
-  border:1px solid var(--border);
-  backdrop-filter:saturate(1.35) blur(var(--glass-blur));
-  -webkit-backdrop-filter:saturate(1.35) blur(var(--glass-blur));
-  border-radius:var(--radius-2xl);
-  box-shadow:var(--shadow-lg);
-}
-.btn{
-  display:inline-flex; align-items:center; gap:10px;
-  padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),var(--primary));
-  color:#fff; font-weight:700; letter-spacing:.2px; text-decoration:none;
-  box-shadow:0 12px 28px rgba(14,165,233,.35);
-  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
-  font-size:13px;
-}
-.btn:hover{transform:translateY(-1px); filter:saturate(1.07)}
-.btn.ghost{
-  background:transparent; color:var(--accent); border:1px solid rgba(11,95,255,.25);
-  box-shadow:var(--shadow-sm);
-}
-.badge{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 12px; border-radius:999px;
-  background:rgba(14,165,233,.12); color:var(--accent); font-weight:700; font-size:12px;
-  border:1px solid rgba(11,95,255,.25);
-}
-.hint{color:var(--muted); font-size:12px}
-hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),rgba(14,165,233,.18)); margin:18px 0 10px}
+.container{max-width:var(--max-w); margin:0 auto; padding:0 10px}
 
-/* NAV (igual a Home) */
+/* NAV */
 .nav{
   position:sticky; top:0; z-index:60; height:var(--nav-h);
   display:flex; align-items:center; backdrop-filter:saturate(1.2) blur(14px);
@@ -96,7 +66,8 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
   background:linear-gradient(60deg,rgba(255,255,255,.55),rgba(255,255,255,0));
   transform:rotate(12deg);
 }
-.nav .tabs{display:flex; gap:8px; align-items:center}
+.badge{display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:rgba(14,165,233,.12); color:#0b3aa6; font-weight:700; font-size:12px; border:1px solid rgba(11,95,255,.25);}
+.tabs{display:flex; gap:8px; align-items:center}
 .tab{
   padding:8px 12px; border-radius:999px; font-weight:700; font-size:13px;
   background:rgba(255,255,255,.7); border:1px solid rgba(11,95,255,.15); cursor:pointer;
@@ -104,92 +75,109 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,rgba(11,95,255,.18),
 }
 .tab.active{background:linear-gradient(135deg,rgba(11,95,255,.15), rgba(14,165,233,.15)); color:#0b3aa6}
 
+/* Login (fix avatar) */
+.login{display:flex; align-items:center; gap:10px}
+#btnGoogleContainer{display:flex; align-items:center; gap:10px}
+#loginStatus{color:#475569; font-size:12px}
+#profile{display:none; align-items:center; gap:10px; position:relative}
+.avatar{width:34px;height:34px;border-radius:999px;overflow:hidden;border:1px solid rgba(11,95,255,.18); box-shadow:0 8px 18px rgba(2,6,23,.1); background:#fff; cursor:pointer}
+.avatar img{width:100%;height:100%;object-fit:cover; border-radius:999px}
+.menu{
+  position:absolute; right:0; top:42px; display:none; min-width:180px;
+  background:rgba(255,255,255,.95); backdrop-filter: blur(10px);
+  border:1px solid rgba(11,95,255,.18); border-radius:14px; box-shadow:0 16px 40px rgba(2,6,23,.16); padding:8px; z-index:99
+}
+.menu a, .menu button{
+  all:unset; display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer; font-size:13px;
+}
+.menu a:hover, .menu button:hover{ background:rgba(14,165,233,.12) }
+#profile.open .menu{display:block}
+
+/* Botones y tarjetas */
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
+  background:linear-gradient(135deg,var(--accent,#0b5fff),var(--primary,#0ea5e9));
+  color:#fff; font-weight:700; letter-spacing:.2px; text-decoration:none;
+  box-shadow:0 12px 28px rgba(14,165,233,.35);
+  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  font-size:13px;
+}
+.btn:hover{transform:translateY(-1px); filter:saturate(1.07)}
+.btn.ghost{
+  background:transparent; color:#0b5fff; border:1px solid rgba(11,95,255,.25);
+  box-shadow:var(--shadow-sm);
+}
+.mini{ font-size:12px; padding:6px 10px }
+
+.card{
+  padding:10px; border-radius:14px; background:rgba(255,255,255,.78);
+  border:1px solid rgba(11,95,255,.14); box-shadow:var(--shadow-sm); font-size:13px
+}
+.card .name{ font-weight:700; color:#0b3aa6; margin-bottom:4px }
+
 /* LAYOUT DEL EDITOR */
-.main-wrap{display:grid; grid-template-columns: 280px 1fr 340px; gap:14px; padding:14px 0 20px;}
-@media (max-width: 1080px){ .main-wrap{ grid-template-columns: 1fr; } .panel, .right{ order:2 } .canvas{ order:1 } }
+.main-wrap{
+  display:grid; grid-template-columns: 320px 1fr 360px; gap:10px; padding:12px 0 16px;
+}
+@media (max-width: 1200px){ .main-wrap{ grid-template-columns: 300px 1fr; } .right{ grid-column: 1 / -1; order:3 } }
 .panel, .right{
   background:rgba(255,255,255,.78); border:1px solid rgba(11,95,255,.14); border-radius:18px; box-shadow:var(--shadow-sm);
   padding:12px; min-height:220px;
 }
-.panel h3, .right h3{ margin:2px 0 10px; font-size:14px; color:#0b3aa6 }
-.row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+h3{ margin:2px 0 10px; font-size:14px; color:#0b3aa6 }
+.label{ font-size:12px; color:#64748b }
 .input, .select, .input-url{
   background:#fff; border:1px solid rgba(11,95,255,.18); border-radius:10px; padding:8px 10px; font-size:13px; outline:0;
 }
 .input{ width:100% } .input.small{width:110px}
 .select{ padding-right:26px }
-.label{ font-size:12px; color:#64748b }
+.row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
 .group{ display:grid; gap:8px; margin-bottom:10px }
 .kv{ display:grid; grid-template-columns: 90px 1fr; gap:8px; align-items:center }
+hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
 
+/* CANVAS */
 .canvas{
   background:rgba(255,255,255,.78); border:1px solid rgba(11,95,255,.14); border-radius:18px; box-shadow:var(--shadow-sm);
-  position:relative; overflow:hidden; min-height:70vh;
+  position:relative; overflow:auto; min-height:calc(100vh - var(--nav-h) - 40px); display:flex; justify-content:center; align-items:flex-start; padding:10px 0;
 }
-.toolbar{
-  display:flex; gap:8px; padding:8px; border-bottom:1px solid rgba(11,95,255,.12);
-  background:linear-gradient(0deg, rgba(255,255,255,.82), rgba(255,255,255,.95));
-  align-items:center; justify-content:space-between;
+.device-wrap{
+  width:var(--device-w); max-width:100%; display:flex; justify-content:center; margin:0 auto;
 }
-.toolbar .left, .toolbar .right { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+#stage{ width:100%; height: calc(100vh - var(--nav-h) - 60px); border:0; background:#fff; border-radius:14px; box-shadow:0 8px 28px rgba(2,6,23,.12); }
 
-/* Iframe */
-#stage{ width:100%; height: calc(80vh - 48px); border:0; background:#fff }
-.stage-wrap{position:relative}
-.stage-help{ position:absolute; right:8px; bottom:8px; background:rgba(255,255,255,.9); border:1px solid rgba(11,95,255,.18); border-radius:10px; padding:6px 8px; font-size:12px; }
+/* Ayuda overlay */
+.stage-help{ position:absolute; right:12px; bottom:12px; background:rgba(255,255,255,.9); border:1px solid rgba(11,95,255,.18); border-radius:10px; padding:6px 8px; font-size:12px; }
 
-/* Bloques PF (en el iframe, se les aplica borde/handle vía CSS-inject) */
-.inspector{ display:grid; gap:8px }
+/* Inspector derecho */
+.inspector{ display:grid; gap:10px }
+#noSelection{ color:#64748b }
 .block-actions{ display:flex; gap:6px; flex-wrap:wrap }
-.mini{ font-size:12px; padding:6px 10px }
-.grid3{ display:grid; gap:8px; grid-template-columns: repeat(3, 1fr) }
 .color{ width:32px; height:32px; border-radius:10px; border:1px solid rgba(11,95,255,.18); background:#fff; padding:0 }
 
-/* Modal pegar/cargar */
-.modal{ position: fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:90; }
-.modal.active{display:flex}
-.modal .scrim{position:absolute; inset:0; background:rgba(2,6,23,.35); backdrop-filter: blur(6px)}
-.dialog{
-  position:relative; width:min(920px, 96vw); max-height:86vh; overflow:auto; padding:0;
-  border-radius:20px; box-shadow:var(--shadow-lg); background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.86));
-  border:1px solid rgba(11,95,255,.2);
-}
-.dialog .head{ display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(11,95,255,.12) }
-.dialog .body{ padding:12px }
-textarea.big{ width:100%; min-height:50vh; border:1px solid rgba(11,95,255,.16); border-radius:12px; padding:10px; font: 13px/1.45 var(--font) }
-
-/* Cards de recientes */
-.cards{ display:grid; gap:10px }
-.card{
-  padding:12px; border-radius:14px; background:rgba(255,255,255,.78);
-  border:1px solid rgba(11,95,255,.14); box-shadow:var(--shadow-sm); font-size:13px
-}
-.card .name{ font-weight:700; color:#0b3aa6; margin-bottom:4px }
-.card .row{ justify-content:flex-start }
-
-/* Estado */
-#status{ font-size:12px; color:#475569 }
-hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
+/* Cards de recientes (izquierda) */
+.cards{ display:grid; gap:8px }
 </style>
 
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <!-- NAV (idéntico a Home) -->
+  <!-- NAV -->
   <div class="nav glass">
     <div class="inner container">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>PsicoFunnel</div>
-        <span class="badge" id="healthBadge" title="Estado de Editor">● Editor</span>
+        <span class="badge" id="healthBadge">● Editor</span>
       </div>
       <div class="tabs" role="tablist" aria-label="Secciones">
         <a class="tab" role="tab" href="/">Creador</a>
-        <a class="tab" role="tab" href="/crm" id="navLeads">Leads</a>
-        <a class="tab" role="tab" href="/secuencias" id="navSeq">Secuencias</a>
-        <a class="tab" role="tab" href="/analytics" id="navAnalytics">Analytics</a>
-        <a class="tab" role="tab" href="/publish-tester" id="navDominio" title="Configurar dominio">Dominio</a>
+        <a class="tab" role="tab" href="/crm">Leads</a>
+        <a class="tab" role="tab" href="/secuencias">Secuencias</a>
+        <a class="tab" role="tab" href="/analytics">Analytics</a>
+        <a class="tab" role="tab" href="/publish-tester">Dominio</a>
         <a class="tab active" role="tab" aria-selected="true" href="/editor">Editor</a>
       </div>
       <div class="login">
@@ -197,8 +185,8 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
           <div id="btnGoogle"></div>
           <span id="loginStatus">No has iniciado sesión</span>
         </div>
-        <div id="profile" style="display:none">
-          <div class="avatar"><img id="avatarImg" alt="Perfil" /></div>
+        <div id="profile">
+          <div class="avatar"><img id="avatarImg" alt="Perfil"></div>
           <div class="menu" id="profileMenu" role="menu" aria-label="Menú de usuario">
             <a href="/crm">Leads</a>
             <a href="/publish-tester">Dominio</a>
@@ -210,26 +198,42 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
   </div>
 
   <!-- CUERPO -->
-  <div class="container" style="padding-top:14px; padding-bottom:20px">
+  <div class="container" style="padding-top:12px; padding-bottom:16px">
     <div class="main-wrap">
-      <!-- PANEL IZQUIERDO: Fuentes / Tema / Recientes -->
+      <!-- PANEL IZQUIERDO -->
       <aside class="panel">
-        <h3>Rápido</h3>
+        <h3>Documento</h3>
         <div class="group">
           <div class="row">
             <button class="btn mini" id="btnPaste">Pegar HTML IA</button>
             <button class="btn mini ghost" id="btnOpenFile">Abrir .html</button>
             <input type="file" id="fileInput" accept=".html,text/html" style="display:none">
           </div>
-          <div class="hint">Pega o abre el HTML que te devuelve la IA/Make (con marcas PF).</div>
+          <div class="row">
+            <button class="btn mini" id="btnSave">Guardar</button>
+            <button class="btn mini ghost" id="btnDownload">Descargar</button>
+            <button class="btn mini ghost" id="btnPreview">Nueva pestaña</button>
+          </div>
+          <div id="status" class="label">Sin documento cargado.</div>
         </div>
 
         <hr class="thin">
+
+        <h3>Dispositivo</h3>
+        <div class="row">
+          <button class="btn mini ghost" data-device="1200">Desktop</button>
+          <button class="btn mini ghost" data-device="992">Tablet</button>
+          <button class="btn mini ghost" data-device="390">Móvil</button>
+          <button class="btn mini" data-device="100%">Ajustar</button>
+        </div>
+
+        <hr class="thin">
+
         <h3>Tema</h3>
         <div class="group">
           <div class="kv"><div class="label">Primario</div><input type="color" class="color" id="tPrimary"><input class="input small" id="tPrimaryHex" placeholder="#0ea5e9"></div>
           <div class="kv"><div class="label">Acento</div><input type="color" class="color" id="tAccent"><input class="input small" id="tAccentHex" placeholder="#0b5fff"></div>
-          <div class="kv"><div class="label">Radio</div><input type="range" id="tRadius" min="0" max="28" step="1"><span class="hint" id="tRadiusVal">16</span></div>
+          <div class="kv"><div class="label">Radio</div><input type="range" id="tRadius" min="0" max="28" step="1"><span class="label" id="tRadiusVal" style="justify-self:start">16</span></div>
           <div class="kv"><div class="label">Fuente</div>
             <select class="select" id="tFont">
               <option>Manrope</option><option>Inter</option><option>Outfit</option><option>Plus Jakarta Sans</option><option>Poppins</option>
@@ -238,41 +242,49 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
         </div>
 
         <hr class="thin">
-        <h3>Últimas 3 landings</h3>
-        <div class="cards" id="recentList">
-          <!-- se llena por JS -->
+
+        <h3>Elementos</h3>
+        <div class="group">
+          <div class="row">
+            <button class="btn mini" data-add="faq">+ FAQ</button>
+            <button class="btn mini" data-add="image">+ Imagen</button>
+            <button class="btn mini" data-add="email">+ Campo Email</button>
+          </div>
+          <div class="row">
+            <button class="btn mini" data-add="calendly">+ Calendly</button>
+            <button class="btn mini ghost" data-add="separator">Separador</button>
+            <button class="btn mini ghost" data-add="button">Botón</button>
+          </div>
+          <div class="label">Se insertan después del bloque seleccionado (o al final si no hay selección).</div>
         </div>
+
+        <hr class="thin">
+
+        <h3>Últimas landings</h3>
+        <div class="cards" id="recentList"></div>
       </aside>
 
       <!-- CANVAS CENTRO -->
       <section class="canvas">
-        <div class="toolbar">
-          <div class="left">
-            <button class="btn mini" id="btnSave">Guardar</button>
-            <button class="btn mini ghost" id="btnDownload">Descargar HTML</button>
-            <button class="btn mini ghost" id="btnPreview">Nueva pestaña</button>
-          </div>
-          <div class="right">
-            <span id="status" class="hint">Sin documento cargado.</span>
-          </div>
-        </div>
-        <div class="stage-wrap">
+        <div class="device-wrap" id="deviceWrap">
           <iframe id="stage" title="Editor PsicoFunnel"></iframe>
-          <div class="stage-help">Click un texto/imagen para editar. Arrastrá el <strong>handle</strong> de cada bloque para reordenar.</div>
         </div>
+        <div class="stage-help">Haz click en textos/imágenes para editar. Arrastra el <strong>handle</strong> del bloque para reordenar.</div>
       </section>
 
       <!-- INSPECTOR DERECHO -->
       <aside class="right">
         <h3>Inspector</h3>
         <div class="inspector">
-          <div id="noSelection" class="hint">Seleccioná un campo editable dentro del canvas.</div>
+          <div id="noSelection" class="label">Selecciona un campo o bloque en el preview.</div>
 
+          <!-- TEXTO -->
           <div id="textTools" style="display:none">
             <div class="label">Texto</div>
-            <textarea id="txtValue" class="input" rows="5" placeholder="Escribe aquí…"></textarea>
+            <textarea id="txtValue" class="input" rows="6" placeholder="Escribe aquí…"></textarea>
             <div class="row">
               <button class="btn mini" id="txtApply">Aplicar</button>
+              <input type="color" id="txtColor" class="color" title="Color de texto">
               <button class="btn mini ghost" id="txtBold">Negrita</button>
               <button class="btn mini ghost" id="txtItalic">Cursiva</button>
               <button class="btn mini ghost" id="txtList">Lista</button>
@@ -280,6 +292,7 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
             </div>
           </div>
 
+          <!-- IMAGEN -->
           <div id="imgTools" style="display:none">
             <div class="label">Imagen</div>
             <input id="imgUrl" class="input-url input" placeholder="https://…">
@@ -289,8 +302,10 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
               <input type="file" id="imgFile" accept="image/*" style="display:none">
             </div>
             <div class="kv"><div class="label">Alt</div><input id="imgAlt" class="input"></div>
+            <div class="kv"><div class="label">Radio</div><input type="range" id="imgRadius" min="0" max="32" step="1"><span class="label" id="imgRadiusVal">12</span></div>
           </div>
 
+          <!-- LINK / BOTÓN -->
           <div id="linkTools" style="display:none">
             <div class="label">Link / Botón</div>
             <div class="kv"><div class="label">Texto</div><input id="lnkText" class="input"></div>
@@ -298,12 +313,28 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
             <div class="row"><button class="btn mini" id="lnkApply">Aplicar</button></div>
           </div>
 
+          <!-- INPUT EMAIL -->
+          <div id="inputTools" style="display:none">
+            <div class="label">Campo Email</div>
+            <div class="kv"><div class="label">Placeholder</div><input id="inpPlaceholder" class="input" placeholder="tu@email.com"></div>
+            <div class="kv"><div class="label">Requerido</div><label><input type="checkbox" id="inpRequired"> Obligatorio</label></div>
+            <div class="row"><button class="btn mini" id="inpApply">Aplicar</button></div>
+          </div>
+
+          <!-- CALENDLY -->
+          <div id="calTools" style="display:none">
+            <div class="label">Calendly</div>
+            <div class="kv"><div class="label">URL</div><input id="calUrl" class="input" placeholder="https://calendly.com/tu-usuario/30min"></div>
+            <div class="kv"><div class="label">Alto</div><input id="calHeight" class="input small" type="number" min="300" step="10" value="700"></div>
+            <div class="row"><button class="btn mini" id="calApply">Aplicar</button></div>
+          </div>
+
           <hr class="thin">
+
+          <!-- BLOQUE -->
           <div id="blockTools" style="display:none">
             <div class="label">Bloque PF</div>
-            <div class="row">
-              <span class="hint" id="blkInfo">id: —</span>
-            </div>
+            <div class="row"><span class="label" id="blkInfo">id: —</span></div>
             <div class="block-actions">
               <button class="btn mini ghost" id="blkUp">Subir</button>
               <button class="btn mini ghost" id="blkDown">Bajar</button>
@@ -325,10 +356,10 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
         <button class="btn mini ghost" id="closePaste">Cerrar</button>
       </div>
       <div class="body">
-        <textarea id="pasteBox" class="big" placeholder="Pega aquí el HTML completo generado por la IA (con marcas PF)…"></textarea>
+        <textarea id="pasteBox" class="input" style="width:100%; min-height:52vh" placeholder="Pega aquí el HTML completo generado por la IA (con marcas PF)…"></textarea>
         <div class="row" style="margin-top:10px">
           <button class="btn" id="loadPasted">Cargar en Editor</button>
-          <span class="hint">Acepta también ```html … ```</span>
+          <span class="label">Acepta también ```html … ```</span>
         </div>
       </div>
     </div>
@@ -336,23 +367,21 @@ hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
 
 <script>
 /* =========================
-   Config / Stores (compatibles con Home)
+   Config / Stores / Login
    ========================= */
 const CLIENT_ID = "668657005630-cljvl7bjqt10iim27aptl60bjqibn5vl.apps.googleusercontent.com";
 const CRM_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRp2Y8yhJ1k4M5ZBDjQ1iC7x5KJW8wZvMiE9s8vh3cX_icO7K_4pJEbTxbCIqyDdXKLQ/exec";
+const LS_LANDINGS = 'pf_landings';
 
 const $ = (s,el=document)=>el.querySelector(s);
 const $$ = (s,el=document)=>Array.from(el.querySelectorAll(s));
 const statusEl = $('#status');
 const iframe = $('#stage');
+const deviceWrap = $('#deviceWrap');
 
-const LS_LANDINGS = 'pf_landings';
 function readLandings(){ try { return JSON.parse(localStorage.getItem(LS_LANDINGS) || '[]'); } catch { return []; } }
 function writeLandings(list){ localStorage.setItem(LS_LANDINGS, JSON.stringify(list || [])); }
 
-/* =========================
-   Login (igual que Home)
-   ========================= */
 let ID_TOKEN=null, USER_EMAIL=null, USER_NAME=null, USER_PIC=null;
 function b64urlToUtf8(b64url){ let b64 = b64url.replace(/-/g,'+').replace(/_/g,'/'); const pad = b64.length % 4; if(pad) b64 += '='.repeat(4-pad); const bin = atob(b64); try{ return decodeURIComponent(Array.from(bin, c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); }catch(_){ return bin; } }
 function decodeJwtPayload(token){ try{ return JSON.parse(b64urlToUtf8(token.split('.')[1]||'')) }catch(_){ return {} } }
@@ -363,6 +392,7 @@ window.addEventListener('load', async ()=>{
     google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onGoogleSignIn });
     const btn = $('#btnGoogle'); if(btn) google.accounts.id.renderButton(btn, { theme:'outline', size:'medium', type:'standard', shape:'pill' });
   }
+  // Autologin
   const t = localStorage.getItem('psico_id_token');
   const n = localStorage.getItem('psico_name');
   const e = localStorage.getItem('psico_email');
@@ -371,50 +401,49 @@ window.addEventListener('load', async ()=>{
     const w = await apiWhoAmI(t).catch(()=>({ok:false}));
     if(w.ok){
       ID_TOKEN=t; USER_EMAIL=w.email||e||null; USER_NAME=n||null; USER_PIC=p||null;
-      document.body.classList.add('logged');
       $('#loginStatus').textContent='Conectado: '+USER_EMAIL;
       const prof=$('#profile'); if(prof){ prof.style.display='flex'; $('#avatarImg').src=USER_PIC||''; }
     }
   }
   renderRecents();
+
+  // Perfil menú toggle
+  const profile = $('#profile');
+  profile?.addEventListener('click', (e)=>{ profile.classList.toggle('open'); });
+  document.addEventListener('click', (e)=>{ if(profile && !profile.contains(e.target)) profile.classList.remove('open'); });
+  $('#logoutBtn')?.addEventListener('click', ()=>{
+    try{ google?.accounts?.id?.disableAutoSelect?.(); }catch(_){}
+    localStorage.removeItem('psico_id_token'); localStorage.removeItem('psico_email'); localStorage.removeItem('psico_name'); localStorage.removeItem('psico_pic');
+    location.href = '/';
+  });
 });
 
 async function onGoogleSignIn(resp){
   const claims = decodeJwtPayload(resp.credential || '');
   USER_NAME  = claims.name || [claims.given_name, claims.family_name].filter(Boolean).join(' ') || null;
-  USER_EMAIL = claims.email || null;
-  USER_PIC   = claims.picture || null;
-
+  USER_EMAIL = claims.email || null; USER_PIC = claims.picture || null;
   const ls = $('#loginStatus'); if(ls) ls.textContent = 'Verificando…';
   const w = await apiWhoAmI(resp.credential).catch(()=>({ok:false}));
   if(!w.ok){ if(ls) ls.textContent = w.error || 'No autorizado'; return; }
-
-  ID_TOKEN = resp.credential;
-  USER_EMAIL = w.email || USER_EMAIL;
+  ID_TOKEN = resp.credential; USER_EMAIL = w.email || USER_EMAIL;
   localStorage.setItem('psico_id_token', ID_TOKEN);
   if(USER_EMAIL) localStorage.setItem('psico_email', USER_EMAIL);
   if(USER_NAME)  localStorage.setItem('psico_name', USER_NAME);
   if(USER_PIC)   localStorage.setItem('psico_pic', USER_PIC);
-
-  document.body.classList.add('logged');
-  if(ls) ls.textContent = 'Conectado: ' + USER_EMAIL;
+  $('#loginStatus').textContent = 'Conectado: ' + USER_EMAIL;
   const prof=$('#profile'); if(prof){ prof.style.display='flex'; $('#avatarImg').src=USER_PIC||''; }
 }
 
 /* =========================
-   Utilidades Editor
+   Utilidades
    ========================= */
 function isFullHTML(t=''){ const s=String(t||'').trim(); const low=s.toLowerCase(); if(low.includes('<html')&&low.includes('</html>')) return true; const m=/```html?\s*([\s\S]*?)```/i.exec(s); return !!(m && /<\/html>/i.test(m[1])); }
 function extractHTML(t=''){ const s=String(t||''); if(isFullHTML(s)) return s; const m=/```html?\s*([\s\S]*?)```/i.exec(s); return m?m[1]:s; }
 function readFileAsText(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsText(file); }); }
 function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
-function sanitizeHTMLSimple(html){ // mini-sanitizer (allow basic tags)
-  const allowed = /<(\/)?(p|br|strong|b|em|i|ul|ol|li|h1|h2|h3|h4|h5|h6|a|span)>/ig;
-  return html.replace(/<script[\s\S]*?<\/script>/ig,'').replace(/ on\w+="[^"]*"/ig,'').replace(/ style="[^"]*"/ig,'');
-}
 
 /* =========================
-   Carga en Iframe + Inicialización
+   Editor Core
    ========================= */
 let currentSchema = null;
 let selectedEl = null;
@@ -427,26 +456,17 @@ async function loadHTMLIntoEditor(html){
   await new Promise(r=> iframe.addEventListener('load', r, {once:true}));
   const doc = iframe.contentDocument;
 
-  // Inserta CSS de ayuda dentro del iframe (handles, resaltado, drag)
   injectEditorCSS(doc);
-
-  // Envolver bloques PF por comentarios <!--PF:START ...--> ... <!--PF:END-->
   wrapPFBlocks(doc);
-
-  // Leer/crear schema
   currentSchema = readSchema(doc) || buildSchemaFromDOM(doc);
   writeSchema(doc, currentSchema);
-
-  // Hook de selección/edición
   bindEditingHandlers(doc);
-
-  // Tema (tokens)
+  enableInlineEditing(doc, true); // <— edición dentro del preview
   hydrateThemeControls(doc, currentSchema?.theme || {});
-
   statusEl.textContent='Documento listo para editar.';
 }
 
-/* Inserta CSS auxiliar para handles/bordes en el iframe */
+/* CSS interno del iframe para handles, selección y edición inline */
 function injectEditorCSS(doc){
   const style = doc.createElement('style');
   style.textContent = `
@@ -459,29 +479,23 @@ function injectEditorCSS(doc){
     padding:4px 8px; box-shadow: 0 8px 18px rgba(2,6,23,.1); cursor:grab; user-select:none;
   }
   .pf-block.drag-over{ outline:2px solid #0ea5e9 }
-  [data-pf]{ outline: 0px solid transparent }
+  [data-pf]{ outline: 0px solid transparent; }
   [data-pf].pf-sel{ outline:2px solid rgba(14,165,233,.7); border-radius:8px }
+  [contenteditable="true"]{ caret-color:#0b5fff; }
   `;
   doc.head.appendChild(style);
 }
 
-/* Envuelve bloques entre comentarios PF */
 function wrapPFBlocks(doc){
   const tw = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
-  const starts = [];
-  const pairs = [];
-  let node;
+  const starts = []; const pairs = []; let node;
   while(node = tw.nextNode()){
     const txt = (node.nodeValue||'').trim();
     const mStart = /^PF:START\s+section="([^"]+)"(?:\s+id="([^"]+)")?/i.exec(txt);
     const mEnd   = /^PF:END/i.test(txt);
     if(mStart){ starts.push({node, section:mStart[1], id:mStart[2] || ('blk-'+Math.random().toString(36).slice(2,8))}); }
-    if(mEnd){
-      const start = starts.pop();
-      if(start){ pairs.push({start: start.node, end: node, meta: {section:start.section, id:start.id}}); }
-    }
+    if(mEnd){ const start = starts.pop(); if(start){ pairs.push({start: start.node, end: node, meta: {section:start.section, id:start.id}}); } }
   }
-  // Wrap pares
   pairs.forEach(pair=>{
     const wrapper = doc.createElement('div');
     wrapper.className='pf-block';
@@ -494,29 +508,16 @@ function wrapPFBlocks(doc){
     handle.textContent = pair.meta.section + ' • ' + pair.meta.id;
     wrapper.appendChild(handle);
 
-    // mover nodos entre start y end dentro del wrapper
-    let n = pair.start.nextSibling;
-    const end = pair.end;
-    const frag = doc.createDocumentFragment();
-    while(n && n !== end){
-      const next = n.nextSibling;
-      frag.appendChild(n);
-      n = next;
-    }
+    let n = pair.start.nextSibling; const end = pair.end; const frag = doc.createDocumentFragment();
+    while(n && n !== end){ const next = n.nextSibling; frag.appendChild(n); n = next; }
     wrapper.appendChild(frag);
-
-    // Insertar wrapper donde estaba el start
     pair.start.parentNode.insertBefore(wrapper, pair.start);
-    // Eliminar comentarios (los repondremos al exportar)
-    pair.start.remove();
-    pair.end.remove();
+    pair.start.remove(); pair.end.remove();
   });
-
-  // DnD por bloque
   bindBlockDragDrop(doc);
 }
 
-/* DnD simple */
+/* DnD */
 function bindBlockDragDrop(doc){
   let dragging=null;
   doc.addEventListener('dragstart', e=>{
@@ -534,31 +535,23 @@ function bindBlockDragDrop(doc){
     const blk = e.target.closest('.pf-block'); if(!blk) return; blk.classList.remove('drag-over');
   });
   doc.addEventListener('drop', e=>{
-    if(!dragging) return;
-    e.preventDefault();
+    if(!dragging) return; e.preventDefault();
     const blk = e.target.closest('.pf-block'); if(!blk || blk===dragging) return;
     blk.classList.remove('drag-over');
-    // Inserción antes o después según posición vertical
     const rect = blk.getBoundingClientRect();
     const before = (e.clientY - rect.top) < rect.height/2;
     if(before) blk.parentNode.insertBefore(dragging, blk);
     else blk.parentNode.insertBefore(dragging, blk.nextSibling);
-    dragging = null;
-    // actualizar schema orden
-    syncSchemaFromDOM();
-    selectBlock(blk); // refresco inspector
+    dragging = null; syncSchemaFromDOM(); selectBlock(blk);
   });
   doc.addEventListener('dragend', ()=>{ dragging=null; });
 }
 
-/* Lee schema embebido */
+/* Schema */
 function readSchema(doc){
-  const s = doc.getElementById('pf-schema');
-  if(!s) return null;
+  const s = doc.getElementById('pf-schema'); if(!s) return null;
   try{ return JSON.parse(s.textContent || s.innerText || '{}'); }catch(_){ return null; }
 }
-
-/* Crea schema básico si no existe */
 function buildSchemaFromDOM(doc){
   const blocks = Array.from(doc.querySelectorAll('.pf-block')).map(blk=>{
     const id = blk.getAttribute('data-pf-block-id');
@@ -566,18 +559,16 @@ function buildSchemaFromDOM(doc){
     const fields = {};
     blk.querySelectorAll('[data-pf]').forEach(el=>{
       const key = el.getAttribute('data-pf');
-      if(key.startsWith('text:') || key.startsWith('rich:')) fields[key.split(':')[1]] = (el.innerHTML || '').trim();
+      if(key.startsWith('text:')) fields[key.split(':')[1]] = el.textContent.trim();
+      if(key.startsWith('rich:')) fields[key.split(':')[1]] = (el.innerHTML || '').trim();
       if(key.startsWith('img:')) fields[key.split(':')[1]] = (el.getAttribute('src') || '');
       if(key.startsWith('video:')) fields[key.split(':')[1]] = (el.getAttribute('src') || '');
-      if(key.startsWith('link:')){
-        const k = key.split(':')[1];
-        fields[k+'Text'] = (el.textContent || '').trim();
-        fields[k+'Url']  = (el.getAttribute('href') || '');
-      }
+      if(key.startsWith('link:')){ const k = key.split(':')[1]; fields[k+'Text']=(el.textContent||'').trim(); fields[k+'Url']=(el.getAttribute('href')||''); }
+      if(key.startsWith('input:')){ const k = key.split(':')[1]; fields[k+'Placeholder']=el.getAttribute('placeholder')||''; fields[k+'Required']=el.hasAttribute('required'); }
+      if(key.startsWith('embed:')){ const k = key.split(':')[1]; fields[k+'Url']=el.getAttribute('data-url')||''; fields[k+'Height']=parseInt(el.getAttribute('data-height')||'700',10); }
     });
     return { id, type, fields };
   });
-  // Tema por tokens
   const cs = getComputedStyle(doc.documentElement);
   const theme = {
     primary: cs.getPropertyValue('--pf-primary').trim() || '#0ea5e9',
@@ -587,18 +578,11 @@ function buildSchemaFromDOM(doc){
   };
   return { page:{title: doc.title || 'Landing IA'}, theme, blocks };
 }
-
-/* Escribe/actualiza schema en el DOM */
 function writeSchema(doc, schema){
   let s = doc.getElementById('pf-schema');
-  if(!s){
-    s = doc.createElement('script'); s.type='application/json'; s.id='pf-schema';
-    doc.body.appendChild(s);
-  }
+  if(!s){ s = doc.createElement('script'); s.type='application/json'; s.id='pf-schema'; doc.body.appendChild(s); }
   s.textContent = JSON.stringify(schema, null, 2);
 }
-
-/* Sincroniza schema con el DOM actual de bloques y campos */
 function syncSchemaFromDOM(){
   const doc = iframe.contentDocument;
   if(!currentSchema) currentSchema = buildSchemaFromDOM(doc);
@@ -613,19 +597,16 @@ function syncSchemaFromDOM(){
       if(key.startsWith('rich:')) fields[key.split(':')[1]] = (el.innerHTML || '').trim();
       if(key.startsWith('img:')) fields[key.split(':')[1]] = (el.getAttribute('src') || '');
       if(key.startsWith('video:')) fields[key.split(':')[1]] = (el.getAttribute('src') || '');
-      if(key.startsWith('link:')){
-        const k = key.split(':')[1];
-        fields[k+'Text'] = (el.textContent || '').trim();
-        fields[k+'Url']  = (el.getAttribute('href') || '');
-      }
+      if(key.startsWith('link:')){ const k = key.split(':')[1]; fields[k+'Text']=(el.textContent||'').trim(); fields[k+'Url']=(el.getAttribute('href')||''); }
+      if(key.startsWith('input:')){ const k = key.split(':')[1]; fields[k+'Placeholder']=el.getAttribute('placeholder')||''; fields[k+'Required']=el.hasAttribute('required'); }
+      if(key.startsWith('embed:')){ const k = key.split(':')[1]; fields[k+'Url']=el.getAttribute('data-url')||''; fields[k+'Height']=parseInt(el.getAttribute('data-height')||'700',10); }
     });
     blocks.push({ id, type, fields });
   });
-  currentSchema.blocks = blocks;
-  writeSchema(doc, currentSchema);
+  currentSchema.blocks = blocks; writeSchema(doc, currentSchema);
 }
 
-/* Controles de selección/inspector */
+/* Selección / Inspector */
 function bindEditingHandlers(doc){
   doc.addEventListener('click', e=>{
     const el = e.target.closest('[data-pf]');
@@ -635,7 +616,6 @@ function bindEditingHandlers(doc){
     clearSelection();
   });
 }
-
 function clearSelection(){
   const doc = iframe.contentDocument;
   doc.querySelectorAll('.pf-sel').forEach(el=> el.classList.remove('pf-sel'));
@@ -644,9 +624,10 @@ function clearSelection(){
   $('#textTools').style.display='none';
   $('#imgTools').style.display='none';
   $('#linkTools').style.display='none';
+  $('#inputTools').style.display='none';
+  '#calTools' && ($('#calTools').style.display='none');
   $('#blockTools').style.display='none';
 }
-
 function selectField(el){
   const doc = iframe.contentDocument;
   doc.querySelectorAll('.pf-sel').forEach(n=> n.classList.remove('pf-sel'));
@@ -658,30 +639,40 @@ function selectField(el){
   $('#blkInfo').textContent = selectedBlock ? ('id: '+selectedBlock.getAttribute('data-pf-block-id')) : 'id: —';
 
   const key = el.getAttribute('data-pf');
+  $('#textTools').style.display='none';
+  $('#imgTools').style.display='none';
+  $('#linkTools').style.display='none';
+  $('#inputTools').style.display='none';
+  '#calTools' && ($('#calTools').style.display='none');
+
   if(key.startsWith('text:') || key.startsWith('rich:')){
     $('#textTools').style.display='';
-    $('#imgTools').style.display='none';
-    $('#linkTools').style.display='none';
     $('#txtValue').value = key.startsWith('text:') ? (el.textContent||'') : (el.innerHTML||'');
+    const curColor = (el.style && el.style.color) ? rgb2hex(getComputedStyle(el).color) : '#0b1220';
+    $('#txtColor').value = curColor;
   }else if(key.startsWith('img:')){
-    $('#textTools').style.display='none';
     $('#imgTools').style.display='';
-    $('#linkTools').style.display='none';
     $('#imgUrl').value = el.getAttribute('src') || '';
     $('#imgAlt').value = el.getAttribute('alt') || '';
+    const br = parseInt((el.style.borderRadius||'12').toString());
+    $('#imgRadius').value = isNaN(br)?12:br; $('#imgRadiusVal').textContent = $('#imgRadius').value;
   }else if(key.startsWith('link:')){
-    $('#textTools').style.display='none';
-    $('#imgTools').style.display='none';
     $('#linkTools').style.display='';
     $('#lnkText').value = (el.textContent||'').trim();
     $('#lnkHref').value = el.getAttribute('href') || '';
-  }else{
-    $('#textTools').style.display='none';
-    $('#imgTools').style.display='none';
-    $('#linkTools').style.display='none';
+  }else if(key.startsWith('input:')){
+    $('#inputTools').style.display='';
+    $('#inpPlaceholder').value = el.getAttribute('placeholder')||'';
+    $('#inpRequired').checked = el.hasAttribute('required');
+  }else if(key.startsWith('embed:')){
+    const t = key.split(':')[1];
+    if(t==='calendly'){
+      $('#calTools').style.display='';
+      $('#calUrl').value = el.getAttribute('data-url')||'';
+      $('#calHeight').value = parseInt(el.getAttribute('data-height')||'700',10);
+    }
   }
 }
-
 function selectBlock(blk){
   const doc = iframe.contentDocument;
   doc.querySelectorAll('.pf-sel').forEach(n=> n.classList.remove('pf-sel'));
@@ -690,27 +681,41 @@ function selectBlock(blk){
   $('#textTools').style.display='none';
   $('#imgTools').style.display='none';
   $('#linkTools').style.display='none';
+  $('#inputTools').style.display='none';
+  '#calTools' && ($('#calTools').style.display='none');
   $('#blockTools').style.display='';
   $('#blkInfo').textContent = 'id: '+blk.getAttribute('data-pf-block-id');
 }
 
-/* =========================
-   Inspector acciones
-   ========================= */
+/* Edición inline en preview */
+function enableInlineEditing(doc, on=true){
+  const editable = doc.querySelectorAll('[data-pf^="text:"], [data-pf^="rich:"]');
+  editable.forEach(el=> el.setAttribute('contenteditable', on?'true':'false'));
+  // Sincroniza schema al escribir
+  let syncTimer=null;
+  doc.addEventListener('input', e=>{
+    if(!e.target.closest('[data-pf^="text:"], [data-pf^="rich:"]')) return;
+    clearTimeout(syncTimer); syncTimer = setTimeout(()=> syncSchemaFromDOM(), 250);
+  });
+}
+
+/* Inspector acciones */
+function sanitizeBasic(html){ return html.replace(/<script[\s\S]*?<\/script>/ig,'').replace(/ on\w+="[^"]*"/ig,''); }
 $('#txtApply').addEventListener('click', ()=>{
   if(!selectedEl) return;
   const key = selectedEl.getAttribute('data-pf');
   const val = $('#txtValue').value || '';
   if(key.startsWith('text:')) selectedEl.textContent = val;
-  else selectedEl.innerHTML = sanitizeHTMLSimple(val);
+  else selectedEl.innerHTML = sanitizeBasic(val);
   syncSchemaFromDOM();
 });
-$('#txtBold').addEventListener('click', ()=> formatSelection('<strong>','</strong>'));
-$('#txtItalic').addEventListener('click', ()=> formatSelection('<em>','</em>'));
+$('#txtColor').addEventListener('input', e=>{ if(selectedEl) { selectedEl.style.color = e.target.value; syncSchemaFromDOM(); } });
+$('#txtBold').addEventListener('click', ()=> surroundSelection('<strong>','</strong>'));
+$('#txtItalic').addEventListener('click', ()=> surroundSelection('<em>','</em>'));
 $('#txtList').addEventListener('click', ()=> insertSnippet('<ul><li>Elemento</li><li>Elemento</li></ul>'));
 $('#txtLink').addEventListener('click', ()=> insertSnippet('<a href="#" target="_self">enlace</a>'));
 
-function formatSelection(pre,post){
+function surroundSelection(pre,post){
   const ta = $('#txtValue'); const start = ta.selectionStart, end = ta.selectionEnd;
   const text = ta.value; const sel = text.slice(start,end);
   const out = text.slice(0,start) + pre + sel + post + text.slice(end);
@@ -735,64 +740,80 @@ $('#imgUploadBtn').addEventListener('click', ()=> $('#imgFile').click());
 $('#imgFile').addEventListener('change', async (e)=>{
   if(!selectedEl) return;
   const f = e.target.files?.[0]; if(!f) return;
-  const dataUrl = await readFileAsDataURL(f); // embebe en base64 para portabilidad
+  const dataUrl = await readFileAsDataURL(f);
   selectedEl.setAttribute('src', dataUrl);
-  syncSchemaFromDOM();
   $('#imgUrl').value = dataUrl.slice(0,48)+'…';
+  syncSchemaFromDOM();
+});
+$('#imgRadius').addEventListener('input', e=>{
+  if(!selectedEl) return;
+  selectedEl.style.borderRadius = e.target.value + 'px';
+  $('#imgRadiusVal').textContent = e.target.value;
+  syncSchemaFromDOM();
 });
 
 $('#lnkApply').addEventListener('click', ()=>{
   if(!selectedEl) return;
-  const txt = ($('#lnkText').value||'');
-  const href = ($('#lnkHref').value||'');
-  selectedEl.textContent = txt;
-  selectedEl.setAttribute('href', href);
+  const txt = ($('#lnkText').value||''); const href = ($('#lnkHref').value||'');
+  selectedEl.textContent = txt; selectedEl.setAttribute('href', href); syncSchemaFromDOM();
+});
+
+$('#inpApply').addEventListener('click', ()=>{
+  if(!selectedEl) return;
+  selectedEl.setAttribute('placeholder', $('#inpPlaceholder').value||'');
+  if($('#inpRequired').checked) selectedEl.setAttribute('required','');
+  else selectedEl.removeAttribute('required');
+  syncSchemaFromDOM();
+});
+
+$('#calApply').addEventListener('click', ()=>{
+  if(!selectedEl) return;
+  const url = ($('#calUrl').value||'').trim();
+  const h = parseInt($('#calHeight').value||'700',10);
+  selectedEl.setAttribute('data-url', url);
+  selectedEl.setAttribute('data-height', String(h));
+  // render iframe
+  const doc = iframe.contentDocument;
+  const frame = selectedEl.querySelector('iframe');
+  if(url){
+    if(!frame){
+      const f = doc.createElement('iframe');
+      f.style.width='100%'; f.style.height = h+'px'; f.style.border='0'; f.loading='lazy';
+      f.src = url;
+      selectedEl.appendChild(f);
+    }else{
+      frame.src = url; frame.style.height = h+'px';
+    }
+  }
   syncSchemaFromDOM();
 });
 
 /* Bloque acciones */
-$('#blkUp').addEventListener('click', ()=>{
-  const blk = selectedBlock; if(!blk) return;
-  const prev = blk.previousElementSibling; if(prev) blk.parentNode.insertBefore(blk, prev);
-  syncSchemaFromDOM();
-});
-$('#blkDown').addEventListener('click', ()=>{
-  const blk = selectedBlock; if(!blk) return;
-  const next = blk.nextElementSibling; if(next) blk.parentNode.insertBefore(next, blk);
-  syncSchemaFromDOM();
-});
+$('#blkUp').addEventListener('click', ()=>{ const blk = selectedBlock; if(!blk) return; const prev = blk.previousElementSibling; if(prev) blk.parentNode.insertBefore(blk, prev); syncSchemaFromDOM(); });
+$('#blkDown').addEventListener('click', ()=>{ const blk = selectedBlock; if(!blk) return; const next = blk.nextElementSibling; if(next) blk.parentNode.insertBefore(next, blk); syncSchemaFromDOM(); });
 $('#blkDuplicate').addEventListener('click', ()=>{
   const blk = selectedBlock; if(!blk) return;
   const clone = blk.cloneNode(true);
   const newId = 'blk-'+Math.random().toString(36).slice(2,8);
   clone.setAttribute('data-pf-block-id', newId);
   const h = clone.querySelector('.pf-handle'); if(h) h.textContent = (clone.getAttribute('data-pf-section')||'section')+' • '+newId;
-  blk.parentNode.insertBefore(clone, blk.nextSibling);
-  syncSchemaFromDOM();
+  blk.parentNode.insertBefore(clone, blk.nextSibling); syncSchemaFromDOM();
 });
-$('#blkDelete').addEventListener('click', ()=>{
-  const blk = selectedBlock; if(!blk) return;
-  blk.remove(); clearSelection(); syncSchemaFromDOM();
-});
+$('#blkDelete').addEventListener('click', ()=>{ const blk = selectedBlock; if(!blk) return; blk.remove(); clearSelection(); syncSchemaFromDOM(); });
 
-/* =========================
-   Tema (tokens)
-   ========================= */
+/* Tema (tokens) */
 function hydrateThemeControls(doc, theme){
   const cs = doc.defaultView.getComputedStyle(doc.documentElement);
   const curP = theme.primary || cs.getPropertyValue('--pf-primary').trim() || '#0ea5e9';
   const curA = theme.accent  || cs.getPropertyValue('--pf-accent').trim()  || '#0b5fff';
   const curR = (theme.radius ?? parseInt(cs.getPropertyValue('--pf-radius')||'16',10)) || 16;
   const curF = theme.font   || cs.getPropertyValue('--pf-font').trim() || 'Manrope';
-
   $('#tPrimary').value = toColor(curP); $('#tPrimaryHex').value = curP;
   $('#tAccent').value  = toColor(curA); $('#tAccentHex').value  = curA;
   $('#tRadius').value  = curR; $('#tRadiusVal').textContent = curR;
   $('#tFont').value    = curF;
-
   applyTheme(curP, curA, curR, curF);
 }
-
 function toColor(val){ try{ if(/^#/.test(val)) return val; }catch(_){ } return '#0ea5e9'; }
 function applyTheme(p,a,r,f){
   const doc = iframe.contentDocument; if(!doc) return;
@@ -801,12 +822,10 @@ function applyTheme(p,a,r,f){
   root.style.setProperty('--pf-accent',  a);
   root.style.setProperty('--pf-radius',  (r||16)+'px');
   root.style.setProperty('--pf-font',    f);
-  // actualizar schema
   if(!currentSchema) currentSchema = { page:{title:doc.title||'Landing'}, theme:{}, blocks:[] };
   currentSchema.theme = { primary:p, accent:a, radius: parseInt(r,10)||16, font:f };
   writeSchema(doc, currentSchema);
 }
-
 $('#tPrimary').addEventListener('input', e=>{ $('#tPrimaryHex').value = e.target.value; applyTheme(e.target.value, $('#tAccent').value, $('#tRadius').value, $('#tFont').value); });
 $('#tAccent').addEventListener('input', e=>{ $('#tAccentHex').value  = e.target.value; applyTheme($('#tPrimary').value, e.target.value, $('#tRadius').value, $('#tFont').value); });
 $('#tPrimaryHex').addEventListener('input', e=>{ applyTheme(e.target.value, $('#tAccentHex').value, $('#tRadius').value, $('#tFont').value); });
@@ -814,12 +833,16 @@ $('#tAccentHex').addEventListener('input', e=>{ applyTheme($('#tPrimaryHex').val
 $('#tRadius').addEventListener('input', e=>{ $('#tRadiusVal').textContent = e.target.value; applyTheme($('#tPrimaryHex').value||$('#tPrimary').value, $('#tAccentHex').value||$('#tAccent').value, e.target.value, $('#tFont').value); });
 $('#tFont').addEventListener('change', e=>{ applyTheme($('#tPrimaryHex').value||$('#tPrimary').value, $('#tAccentHex').value||$('#tAccent').value, $('#tRadius').value, e.target.value); });
 
-/* =========================
-   Guardar / Exportar
-   ========================= */
+/* Dispositivo */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('[data-device]'); if(!b) return;
+  const w = b.getAttribute('data-device');
+  deviceWrap.style.setProperty('--device-w', w==='100%' ? '100%' : (w+'px'));
+});
+
+/* Guardar / Exportar */
 $('#btnSave').addEventListener('click', ()=>{
   const html = buildExportHTML(); if(!html) return;
-  // Persistir en pf_landings (actualiza o inserta)
   const list = readLandings();
   const id = 'landing-'+Date.now();
   const title = (currentSchema?.page?.title || 'Landing IA')+' — editada';
@@ -828,41 +851,33 @@ $('#btnSave').addEventListener('click', ()=>{
   renderRecents();
   statusEl.textContent='Guardado en “pf_landings”.';
 });
-
 $('#btnDownload').addEventListener('click', ()=>{
   const html = buildExportHTML(); if(!html) return;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
   a.download = (currentSchema?.page?.title ? currentSchema.page.title.replace(/\s+/g,'-').toLowerCase() : 'landing') + '.html';
-  a.click();
-  setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+  a.click(); setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
 });
-
 $('#btnPreview').addEventListener('click', ()=>{
   const html = buildExportHTML(); if(!html) return;
   const url = URL.createObjectURL(new Blob([html], {type:'text/html'}));
-  window.open(url,'_blank','noopener');
-  setTimeout(()=> URL.revokeObjectURL(url), 20000);
+  window.open(url,'_blank','noopener'); setTimeout(()=> URL.revokeObjectURL(url), 20000);
 });
 
-/* Construye el HTML final: re-inyecta comentarios PF y pf-schema actualizado */
 function buildExportHTML(){
   const doc = iframe.contentDocument; if(!doc){ alert('No hay documento cargado.'); return ''; }
   syncSchemaFromDOM();
-
-  // Clonar para export
   const clone = doc.documentElement.cloneNode(true);
   const cdoc = document.implementation.createHTMLDocument('');
   cdoc.replaceChild(cdoc.importNode(clone, true), cdoc.documentElement);
 
-  // Reconvertir wrappers .pf-block → comentarios PF
+  // revertir .pf-block -> comentarios PF
   cdoc.querySelectorAll('.pf-block').forEach(blk=>{
     const id = blk.getAttribute('data-pf-block-id') || ('blk-'+Math.random().toString(36).slice(2,8));
     const sec = blk.getAttribute('data-pf-section') || 'section';
     const start = cdoc.createComment(`PF:START section="${sec}" id="${id}"`);
     const end   = cdoc.createComment(`PF:END`);
     const frag = cdoc.createDocumentFragment();
-    // mover hijos excepto el handle
     Array.from(blk.childNodes).forEach(ch=>{
       if(ch.nodeType===1 && ch.classList.contains('pf-handle')) return;
       frag.appendChild(ch);
@@ -870,22 +885,15 @@ function buildExportHTML(){
     blk.replaceWith(start, frag, end);
   });
 
-  // pf-schema ya está actualizado en el DOM del iframe; aseguremos que exista
+  // schema actualizado
   let schemaTag = cdoc.getElementById('pf-schema');
-  if(!schemaTag){
-    schemaTag = cdoc.createElement('script'); schemaTag.type='application/json'; schemaTag.id='pf-schema';
-    cdoc.body.appendChild(schemaTag);
-  }
+  if(!schemaTag){ schemaTag = cdoc.createElement('script'); schemaTag.type='application/json'; schemaTag.id='pf-schema'; cdoc.body.appendChild(schemaTag); }
   schemaTag.textContent = JSON.stringify(currentSchema || buildSchemaFromDOM(cdoc), null, 2);
 
-  // DOCTYPE + HTML
-  const html = '<!doctype html>\n' + cdoc.documentElement.outerHTML;
-  return html;
+  return '<!doctype html>\n' + cdoc.documentElement.outerHTML;
 }
 
-/* =========================
-   UI: pegar/abrir y recientes
-   ========================= */
+/* Pegar/Abrir + Recientes */
 const pasteModal = $('#pasteModal');
 $('#btnPaste').addEventListener('click', ()=> pasteModal.classList.add('active'));
 $('#closePaste').addEventListener('click', ()=> pasteModal.classList.remove('active'));
@@ -908,7 +916,7 @@ function renderRecents(){
   const list = readLandings();
   const holder = $('#recentList'); holder.innerHTML='';
   if(!list.length){
-    holder.innerHTML = '<div class="card"><div class="name">No hay landings guardadas</div><div class="hint">Guarda desde el Creador o desde aquí y aparecerán.</div></div>';
+    holder.innerHTML = '<div class="card"><div class="name">No hay landings</div><div class="label">Guarda desde el Creador o desde aquí y aparecerán.</div></div>';
     return;
   }
   list.slice(0,3).forEach(item=>{
@@ -923,16 +931,65 @@ function renderRecents(){
     `;
     holder.appendChild(div);
   });
+  holder.onclick = (e)=>{
+    const idEdit = e.target.closest('[data-edit]')?.getAttribute('data-edit');
+    const idPrev = e.target.closest('[data-prev]')?.getAttribute('data-prev');
+    if(idEdit){ const it = list.find(x=>x.id===idEdit); if(it?.html) loadHTMLIntoEditor(it.html); }
+    if(idPrev){ const it = list.find(x=>x.id===idPrev); if(it?.html){ const url = URL.createObjectURL(new Blob([it.html],{type:'text/html'})); window.open(url,'_blank','noopener'); setTimeout(()=> URL.revokeObjectURL(url), 20000); } }
+  };
+}
 
-  holder.addEventListener('click', e=>{
-    const bEdit = e.target.closest('[data-edit]'); if(bEdit){
-      const id = bEdit.getAttribute('data-edit'); const it = list.find(x=>x.id===id); if(it?.html) loadHTMLIntoEditor(it.html);
-    }
-    const bPrev = e.target.closest('[data-prev]'); if(bPrev){
-      const id = bPrev.getAttribute('data-prev'); const it = list.find(x=>x.id===id);
-      if(it?.html){ const url = URL.createObjectURL(new Blob([it.html],{type:'text/html'})); window.open(url,'_blank','noopener'); setTimeout(()=> URL.revokeObjectURL(url), 20000); }
-    }
-  }, {once:true});
+/* Elementos: insertar bloques */
+document.addEventListener('click', (e)=>{
+  const add = e.target.closest('[data-add]'); if(!add) return;
+  const type = add.getAttribute('data-add'); insertBlock(type);
+});
+function insertBlock(type){
+  const doc = iframe.contentDocument; if(!doc) return;
+  const target = selectedBlock || doc.querySelector('.pf-block:last-of-type');
+  const host = target ? target.parentNode : doc.body;
+  const blk = buildBlock(doc, type);
+  if(target) host.insertBefore(blk, target.nextSibling); else host.appendChild(blk);
+  syncSchemaFromDOM();
+}
+function buildBlock(doc, type){
+  const id = 'blk-'+Math.random().toString(36).slice(2,8);
+  const wrap = doc.createElement('div');
+  wrap.className='pf-block'; wrap.setAttribute('data-pf-block-id', id); wrap.setAttribute('data-pf-section', type); wrap.setAttribute('draggable','true');
+  const h = doc.createElement('div'); h.className='pf-handle'; h.textContent = type+' • '+id; wrap.appendChild(h);
+
+  if(type==='faq'){
+    wrap.innerHTML += `
+      <section class="faq" style="padding:24px 16px"><h2 data-pf="text:title">Preguntas frecuentes</h2>
+      <div data-pf="rich:body"><p><strong>¿Pregunta 1?</strong> Respuesta breve.</p><p><strong>¿Pregunta 2?</strong> Respuesta breve.</p></div></section>`;
+  }else if(type==='image'){
+    wrap.innerHTML += `<div style="padding:16px"><img data-pf="img:hero" src="https://picsum.photos/1200/600" alt="Imagen" style="width:100%; border-radius:12px;"></div>`;
+  }else if(type==='email'){
+    wrap.innerHTML += `<section class="leadform" style="padding:20px 16px">
+      <label class="label" style="display:block; margin-bottom:6px">Tu email</label>
+      <input data-pf="input:email" type="email" placeholder="tu@email.com" required style="width:100%; padding:12px 14px; border:1px solid #d0d7e2; border-radius:12px">
+      <div style="margin-top:10px"><a data-pf="link:cta" href="#enviar" style="display:inline-block; background:linear-gradient(135deg, var(--pf-accent,#0b5fff), var(--pf-primary,#0ea5e9)); color:#fff; padding:10px 14px; border-radius:999px; text-decoration:none; font-weight:700">Enviar</a></div>
+    </section>`;
+  }else if(type==='calendly'){
+    wrap.innerHTML += `<section class="cal-card" style="padding:16px">
+      <div data-pf="embed:calendly" data-url="https://calendly.com/tu-usuario/30min" data-height="700" style="background:rgba(11,95,255,.06); border:1px solid rgba(11,95,255,.18); border-radius:14px; padding:8px">
+        <div style="padding:14px; text-align:center; color:#0b3aa6; font-weight:700">Calendly (configura en Inspector)</div>
+      </div>
+    </section>`;
+  }else if(type==='separator'){
+    wrap.innerHTML += `<hr style="border:0;height:1px;background:rgba(0,0,0,.08); margin:18px 0">`;
+  }else if(type==='button'){
+    wrap.innerHTML += `<div style="padding:16px"><a data-pf="link:cta" href="#" style="display:inline-block; background:linear-gradient(135deg, var(--pf-accent,#0b5fff), var(--pf-primary,#0ea5e9)); color:#fff; padding:10px 14px; border-radius:999px; text-decoration:none; font-weight:700">Llamar a la acción</a></div>`;
+  }else{
+    wrap.innerHTML += `<section style="padding:24px 16px"><h2 data-pf="text:title">Nuevo bloque</h2><p data-pf="rich:body">Contenido editable…</p></section>`;
+  }
+  return wrap;
+}
+
+/* Helpers colores */
+function rgb2hex(rgb){
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb||''); if(!m) return '#0b1220';
+  return '#'+[m[1],m[2],m[3]].map(x=> (+x).toString(16).padStart(2,'0')).join('');
 }
 </script>
 </body>
