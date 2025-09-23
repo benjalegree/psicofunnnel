@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PsicoFunnel — Editor no-code (Free Move + Form Builder + FX + Calendly + Testimonios)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<style>
+/* =========================
+   PsicoFunnel — Estética base
+   ========================= */
+:root{
+  --bg:#f4f7fb;
+  --bg-grad: radial-gradient(1200px 800px at 20% -10%, #eaf2ff 0%, rgba(234,242,255,0) 60%),
+             radial-gradient(900px 700px at 100% 0%, #f0fbff 0%, rgba(240,251,255,0) 60%);
+  --card: rgba(255,255,255,.62);
+  --border: rgba(255,255,255,.38);
+  --text:#0b1220;
+  --muted:#6b7280;
+  --primary:#0ea5e9;
+  --accent:#0b5fff;
+  --shadow-sm: 0 6px 16px rgba(2,6,23,.08);
+  --shadow-md: 0 10px 30px rgba(2,6,23,.10);
+  --shadow-lg: 0 20px 60px rgba(15,23,42,.12);
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --nav-h: 68px;
+  --max-w: 1760px; /* + fidelidad preview */
+  --device-w: 100%; /* fidelidad escritorio por defecto */
+  --mac-gloss-top: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0));
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color:var(--text);
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  background-attachment: fixed;
+}
+.container{max-width:var(--max-w); margin:0 auto; padding:0 8px}
+
+/* NAV */
+.nav{
+  position:sticky; top:0; z-index:60; height:var(--nav-h);
+  display:flex; align-items:center; backdrop-filter:saturate(1.2) blur(14px);
+  -webkit-backdrop-filter:saturate(1.2) blur(14px);
+  border-bottom:1px solid rgba(11,95,255,.08);
+  background:rgba(255,255,255,.7);
+}
+.nav .inner{display:flex; align-items:center; justify-content:space-between}
+.brand{ display:flex; align-items:center; gap:12px; font-weight:900; letter-spacing:.2px; }
+.brand .logo{
+  width:36px; height:36px; border-radius:14px;
+  background:linear-gradient(135deg,#0b5fff 0%, #0ea5e9 100%);
+  box-shadow:0 10px 30px rgba(11,95,255,.28), inset 0 0 20px rgba(255,255,255,.35);
+  position:relative; overflow:hidden;
+}
+.brand .logo::after{
+  content:""; position:absolute; inset:-40% -20% auto auto; width:120%; height:120%;
+  background:linear-gradient(60deg,rgba(255,255,255,.55),rgba(255,255,255,0));
+  transform:rotate(12deg);
+}
+.badge{display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:rgba(14,165,233,.12); color:#0b3aa6; font-weight:700; font-size:12px; border:1px solid rgba(11,95,255,.25);}
+.tabs{display:flex; gap:8px; align-items:center}
+.tab{
+  padding:8px 12px; border-radius:999px; font-weight:700; font-size:13px;
+  background:rgba(255,255,255,.7); border:1px solid rgba(11,95,255,.15); cursor:pointer;
+  text-decoration:none; color:inherit;
+}
+.tab.active{background:linear-gradient(135deg,rgba(11,95,255,.15), rgba(14,165,233,.15)); color:#0b3aa6}
+
+/* Login (avatar fix) */
+.login{display:flex; align-items:center; gap:10px}
+#btnGoogleContainer{display:flex; align-items:center; gap:10px}
+#loginStatus{color:#475569; font-size:12px}
+#profile{display:none; align-items:center; gap:10px; position:relative}
+.avatar{width:34px;height:34px;border-radius:999px;overflow:hidden;border:1px solid rgba(11,95,255,.18); box-shadow:0 8px 18px rgba(2,6,23,.1); background:#fff; cursor:pointer}
+.avatar img{width:100%;height:100%;object-fit:cover; border-radius:999px}
+.menu{
+  position:absolute; right:0; top:42px; display:none; min-width:190px;
+  background:rgba(255,255,255,.95); backdrop-filter: blur(10px);
+  border:1px solid rgba(11,95,255,.18); border-radius:14px; box-shadow:0 16px 40px rgba(2,6,23,.16); padding:8px; z-index:99
+}
+.menu a, .menu button{
+  all:unset; display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; cursor:pointer; font-size:13px;
+}
+.menu a:hover, .menu button:hover{ background:rgba(14,165,233,.12) }
+#profile.open .menu{display:block}
+
+/* LAYOUT */
+.main-wrap{
+  display:grid; grid-template-columns: 300px 1fr 360px; gap:10px; padding:12px 0 16px; /* preview + ancho */
+}
+@media (max-width: 1300px){ .main-wrap{ grid-template-columns: 320px 1fr; } .right{ grid-column: 1 / -1; order:3 } }
+.panel, .right{
+  background:rgba(255,255,255,.78); border:1px solid rgba(11,95,255,.14); border-radius:18px; box-shadow:var(--shadow-sm);
+  padding:12px; min-height:220px;
+}
+h3{ margin:2px 0 10px; font-size:14px; color:#0b3aa6 }
+.label{ font-size:12px; color:#64748b }
+.input, .select, .input-url{
+  background:#fff; border:1px solid rgba(11,95,255,.18); border-radius:10px; padding:8px 10px; font-size:13px; outline:0;
+}
+.input{ width:100% } .input.small{width:110px}
+.select{ padding-right:26px }
+.row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+.group{ display:grid; gap:8px; margin-bottom:10px }
+.kv{ display:grid; grid-template-columns: 120px 1fr; gap:8px; align-items:center }
+hr.thin{ border:0; height:1px; background:rgba(11,95,255,.12); margin:10px 0 }
+
+/* Botones */
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
+  background:linear-gradient(135deg,var(--accent,#0b5fff),var(--primary,#0ea5e9));
+  color:#fff; font-weight:700; letter-spacing:.2px; text-decoration:none;
+  box-shadow:0 12px 28px rgba(14,165,233,.35);
+  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  font-size:13px;
+}
+.btn:hover{transform:translateY(-1px); filter:saturate(1.07)}
+.btn.ghost{
+  background:transparent; color:#0b5fff; border:1px solid rgba(11,95,255,.25);
+  box-shadow:var(--shadow-sm);
+}
+.mini{ font-size:12px; padding:6px 10px }
+
+/* Botones estilo  (panel) */
+.icon-btn{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.7)), var(--mac-gloss-top);
+  border:1px solid rgba(11,95,255,.16);
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 8px 16px rgba(2,6,23,.08);
+  font-weight:700; cursor:pointer;
+}
+.icon-chip{
+  width:18px; height:18px; border-radius:6px;
+  background:linear-gradient(135deg, #0b5fff, #0ea5e9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 6px 14px rgba(11,95,255,.25);
+}
+
+/* Canvas (fidelidad alta) */
+.canvas{
+  background:rgba(255,255,255,.78); border:1px solid rgba(11,95,255,.14); border-radius:18px; box-shadow:var(--shadow-sm);
+  position:relative; overflow:auto; min-height:calc(100vh - var(--nav-h) - 40px); display:flex; justify-content:center; align-items:flex-start; padding:10px 0;
+}
+.device-wrap{ width:var(--device-w); max-width:100%; margin:0 auto; }
+#stage{
+  width:100%;
+  height: calc(100vh - var(--nav-h) - 60px);
+  border:0; background:#fff; border-radius:14px; box-shadow:0 8px 28px rgba(2,6,23,.10);
+}
+
+/* Ayuda overlay */
+.stage-help{ position:absolute; right:12px; bottom:12px; background:rgba(255,255,255,.9); border:1px solid rgba(11,95,255,.18); border-radius:10px; padding:6px 8px; font-size:12px; }
+
+/* Recientes */
+.cards{ display:grid; gap:8px }
+.card{ padding:10px; border-radius:14px; background:rgba(255,255,255,.78); border:1px solid rgba(11,95,255,.14); box-shadow:var(--shadow-sm); font-size:13px }
+.card .name{ font-weight:700; color:#0b3aa6; margin-bottom:4px }
+
+/* Modal */
+.modal{ position: fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:90; }
+.modal.active{display:flex}
+.modal .scrim{position:absolute; inset:0; background:rgba(2,6,23,.35); backdrop-filter: blur(6px)}
+.dialog{
+  position:relative; width:min(980px, 96vw); max-height:86vh; overflow:auto; padding:0;
+  border-radius:20px; box-shadow:var(--shadow-lg); background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.86));
+  border:1px solid rgba(11,95,255,.2);
+}
+.dialog .head{ display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(11,95,255,.12) }
+.dialog .body{ padding:12px }
+
+/* Acordeones (panel izq) */
+details.accordion{
+  border:1px solid rgba(11,95,255,.12);
+  background:rgba(255,255,255,.7);
+  border-radius:14px;
+  padding:6px 10px;
+  margin-bottom:10px;
+}
+details.accordion > summary{
+  list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:800; color:#0b3aa6; padding:4px 2px;
+}
+details.accordion > summary::-webkit-details-marker{ display:none }
+details.accordion .content{ padding:8px 0 2px }
+
+/* Iconos */
+.icon{ width:16px; height:16px; display:inline-block; }
+
+/* ======== CSS interno del iframe para edición ======== */
+</style>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="inner container">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>PsicoFunnel</div>
+        <span class="badge">● Editor</span>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Secciones">
+        <a class="tab" role="tab" href="/">Creador</a>
+        <a class="tab" role="tab" href="/crm">Leads</a>
+        <a class="tab" role="tab" href="/secuencias">Secuencias</a>
+        <a class="tab" role="tab" href="/analytics">Analytics</a>
+        <a class="tab" role="tab" href="/publish-tester">Dominio</a>
+        <a class="tab active" role="tab" aria-selected="true" href="/editor">Editor</a>
+      </div>
+      <div class="login">
+        <div id="btnGoogleContainer">
+          <div id="btnGoogle"></div>
+          <span id="loginStatus">No has iniciado sesión</span>
+        </div>
+        <div id="profile">
+          <div class="avatar"><img id="avatarImg" alt="Perfil"></div>
+          <div class="menu" id="profileMenu" role="menu" aria-label="Menú de usuario">
+            <a href="/crm">Leads</a>
+            <a href="/publish-tester">Dominio</a>
+            <button id="logoutBtn">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUERPO -->
+  <div class="container" style="padding-top:12px; padding-bottom:16px">
+    <div class="main-wrap">
+      <!-- PANEL IZQUIERDO -->
+      <aside class="panel">
+        <!-- Documento -->
+        <details class="accordion" open>
+          <summary>
+            <span class="icon-chip"></span>
+            Documento
+          </summary>
+          <div class="content">
+            <div class="group">
+              <div class="row">
+                <button class="icon-btn" id="btnPaste"><span class="icon-chip"></span> Pegar HTML IA</button>
+                <button class="icon-btn" id="btnOpenFile"><span class="icon-chip"></span> Abrir .html</button>
+                <input type="file" id="fileInput" accept=".html,text/html" style="display:none">
+              </div>
+              <div class="row">
+                <button class="icon-btn" id="btnSave"><span class="icon-chip"></span> Guardar</button>
+                <button class="icon-btn" id="btnDownload"><span class="icon-chip"></span> Descargar</button>
+                <button class="icon-btn" id="btnPreview"><span class="icon-chip"></span> Nueva pestaña</button>
+              </div>
+              <div class="row">
+                <div class="kv">
+                  <div class="label">Color fondo página</div>
+                  <input type="color" id="pageBg" class="input small" value="#ffffff" title="Fondo del documento">
+                </div>
+              </div>
+              <div id="status" class="label">Sin documento cargado.</div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Dispositivo -->
+        <details class="accordion" open>
+          <summary>
+            <span class="icon-chip"></span>
+            Dispositivo
+          </summary>
+          <div class="content">
+            <div class="row">
+              <button class="icon-btn" data-device="100%" title="PC"><span class="icon-chip"></span> PC</button>
+              <button class="icon-btn" data-device="430" title="Móvil"><span class="icon-chip"></span> Móvil</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- Tema -->
+        <details class="accordion">
+          <summary>
+            <span class="icon-chip"></span>
+            Tema
+          </summary>
+          <div class="content">
+            <div class="group">
+              <div class="kv"><div class="label">Primario</div><input type="color" class="input small" id="tPrimary" value="#0ea5e9"></div>
+              <div class="kv"><div class="label">Acento</div><input type="color" class="input small" id="tAccent" value="#0b5fff"></div>
+              <div class="kv"><div class="label">Radio global</div><input type="range" id="tRadius" min="0" max="28" step="1" value="16"></div>
+              <div class="kv"><div class="label">Fuente</div>
+                <select class="select" id="tFont">
+                  <option>Manrope</option><option>Inter</option><option>Outfit</option><option>Plus Jakarta Sans</option><option>Poppins</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Elementos -->
+        <details class="accordion">
+          <summary>
+            <span class="icon-chip"></span>
+            Elementos (arrastrar)
+          </summary>
+          <div class="content">
+            <div class="group">
+              <div class="row">
+                <button class="btn mini" data-add="heading">+ Título</button>
+                <button class="btn mini" data-add="text">+ Texto</button>
+                <button class="btn mini" data-add="image">+ Imagen</button>
+                <button class="btn mini" data-add="video">+ Video</button>
+              </div>
+              <div class="row">
+                <button class="btn mini" data-add="faq">+ FAQ</button>
+                <button class="btn mini" data-add="button">+ Botón</button>
+                <button class="btn mini" data-add="2cols">+ 2 columnas</button>
+                <button class="btn mini" data-add="3cols">+ 3 columnas</button>
+              </div>
+              <div class="row">
+                <button class="btn mini ghost" data-add="separator">Separador</button>
+                <button class="btn mini" data-add="form">+ Formulario</button>
+                <button class="btn mini" data-add="calendly">+ Calendly</button>
+                <button class="btn mini" data-add="testimonials">+ Testimonios</button>
+              </div>
+              <div class="label">Se inserta tras el bloque seleccionado o al final.</div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Constructor de Formulario -->
+        <details class="accordion">
+          <summary>
+            <span class="icon-chip"></span>
+            Constructor de Formulario
+          </summary>
+          <div class="content">
+            <div class="group">
+              <div class="row">
+                <label><input type="checkbox" class="form-field" value="name" checked> Nombre</label>
+                <label><input type="checkbox" class="form-field" value="email" checked> Email</label>
+                <label><input type="checkbox" class="form-field" value="phone"> Teléfono</label>
+                <label><input type="checkbox" class="form-field" value="company"> Empresa</label>
+                <label><input type="checkbox" class="form-field" value="message"> Mensaje</label>
+              </div>
+              <div class="kv"><div class="label">Campo personalizado</div><input id="customField" class="input" placeholder="ej: presupuesto"></div>
+              <div class="row">
+                <label><input type="checkbox" id="reqAll"> Todos obligatorios</label>
+              </div>
+              <div class="row">
+                <button class="btn mini" id="insertForm">Insertar formulario</button>
+                <button class="btn mini ghost" id="updateForm">Actualizar seleccionado</button>
+              </div>
+              <div class="label">El formulario usa tu endpoint ya configurado.</div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Últimas landings -->
+        <details class="accordion" open>
+          <summary>
+            <span class="icon-chip"></span>
+            Últimas landings
+          </summary>
+          <div class="content">
+            <div class="cards" id="recentList"></div>
+          </div>
+        </details>
+      </aside>
+
+      <!-- CANVAS CENTRO -->
+      <section class="canvas">
+        <div class="device-wrap" id="deviceWrap">
+          <iframe id="stage" title="Editor PsicoFunnel"></iframe>
+        </div>
+        <div class="stage-help">Click para editar · Arrastra imágenes/bloques (modo Libre) · Redimensiona desde esquinas. Los links no navegan en el preview.</div>
+      </section>
+
+      <!-- INSPECTOR DERECHO -->
+      <aside class="right">
+        <h3>Inspector</h3>
+        <div class="inspector" style="display:grid;gap:10px">
+
+          <div id="noSelection" class="label">Selecciona un campo, imagen o bloque.</div>
+
+          <!-- TOOLS GENERALES DEL BLOQUE -->
+          <div id="blockTools" style="display:none">
+            <div class="row" style="justify-content:space-between; align-items:center">
+              <div class="label">Bloque</div>
+              <label><input type="checkbox" id="freeMoveToggle"> Modo libre</label>
+            </div>
+            <div class="row">
+              <button class="btn mini ghost" id="blkUp">Subir</button>
+              <button class="btn mini ghost" id="blkDown">Bajar</button>
+              <button class="btn mini ghost" id="blkDuplicate">Duplicar</button>
+              <button class="btn mini" id="blkDelete" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">Eliminar</button>
+            </div>
+            <div class="kv"><div class="label">Fondo bloque</div><input type="color" id="blkBg" class="input small" value="#ffffff"></div>
+            <div class="kv"><div class="label">Padding</div><input type="range" id="blkPad" min="0" max="64" step="2" value="24"></div>
+            <div class="kv"><div class="label">Radio</div><input type="range" id="blkRadius" min="0" max="36" step="1" value="12"></div>
+
+            <!-- FX del bloque -->
+            <div class="label" style="margin-top:6px">Efectos del bloque</div>
+            <div class="kv"><div class="label">Sombra</div><input type="range" id="fxShadow" min="0" max="3" step="1" value="1"></div>
+            <div class="kv"><div class="label">Blur fondo</div><input type="range" id="fxBgBlur" min="0" max="20" step="1" value="0"></div>
+            <div class="kv"><div class="label">Opacidad</div><input type="range" id="fxOpacityBlk" min="0.2" max="1" step="0.05" value="1"></div>
+          </div>
+
+          <!-- TEXTO -->
+          <div id="textTools" style="display:none">
+            <div class="label">Texto</div>
+            <textarea id="txtValue" class="input" rows="6" placeholder="Escribe aquí…"></textarea>
+            <div class="row">
+              <input type="color" id="txtColor" class="input small" title="Color de texto" value="#0b1220">
+              <button class="btn mini" id="txtApply">Aplicar</button>
+              <button class="btn mini ghost" id="txtBold">Negrita</button>
+              <button class="btn mini ghost" id="txtItalic">Cursiva</button>
+              <button class="btn mini ghost" id="txtList">Lista</button>
+              <button class="btn mini ghost" id="txtLink">Link</button>
+            </div>
+          </div>
+
+          <!-- IMAGEN -->
+          <div id="imgTools" style="display:none">
+            <div class="label">Imagen</div>
+            <input id="imgUrl" class="input" placeholder="https://… o data:image/…">
+            <div class="row">
+              <button class="btn mini" id="imgApply">Reemplazar</button>
+              <button class="btn mini ghost" id="imgUploadBtn">Subir archivo</button>
+              <input type="file" id="imgFile" accept="image/*" style="display:none">
+              <button class="btn mini ghost" id="imgWrapLink">Enlazar imagen</button>
+            </div>
+            <div class="kv"><div class="label">Alt</div><input id="imgAlt" class="input"></div>
+            <div class="kv"><div class="label">Radio</div><input type="range" id="imgRadius" min="0" max="40" step="1" value="12"></div>
+            <div class="label">Efectos</div>
+            <div class="kv"><div class="label">Blur</div><input type="range" id="fxBlur" min="0" max="12" step="0.5" value="0"></div>
+            <div class="kv"><div class="label">Brillo</div><input type="range" id="fxBright" min="0.2" max="2" step="0.1" value="1"></div>
+            <div class="kv"><div class="label">Contraste</div><input type="range" id="fxContrast" min="0.5" max="2" step="0.1" value="1"></div>
+            <div class="kv"><div class="label">Saturación</div><input type="range" id="fxSat" min="0" max="2" step="0.1" value="1"></div>
+            <div class="kv"><div class="label">Opacidad</div><input type="range" id="fxOpacity" min="0.1" max="1" step="0.05" value="1"></div>
+            <div class="kv"><div class="label">Rotación</div><input type="range" id="fxRotate" min="-180" max="180" step="1" value="0"></div>
+            <div class="label">Redimensiona desde las esquinas (en el preview).</div>
+          </div>
+
+          <!-- VIDEO / VSL / WEBINAR -->
+          <div id="videoTools" style="display:none">
+            <div class="label">Video (archivo o YouTube)</div>
+            <div class="row">
+              <button class="btn mini ghost" id="vidUploadBtn">Subir archivo</button>
+              <input type="file" id="vidFile" accept="video/mp4,video/webm" style="display:none">
+              <input id="ytIframe" class="input" placeholder='Pega aquí el <iframe> de YouTube'>
+              <button class="btn mini" id="vidApply">Aplicar</button>
+            </div>
+            <div class="label">Soporta .mp4/.webm o código &lt;iframe&gt; de YouTube.</div>
+          </div>
+
+          <!-- LINK / BOTÓN -->
+          <div id="linkTools" style="display:none">
+            <div class="label">Link/Botón</div>
+            <div class="kv"><div class="label">Texto</div><input id="lnkText" class="input"></div>
+            <div class="kv"><div class="label">URL</div><input id="lnkHref" class="input" placeholder="https://… o #id"></div>
+            <div class="row"><button class="btn mini" id="lnkApply">Aplicar</button></div>
+          </div>
+
+          <!-- INPUT EMAIL/GENÉRICO -->
+          <div id="inputTools" style="display:none">
+            <div class="label">Campo</div>
+            <div class="kv"><div class="label">Placeholder</div><input id="inpPlaceholder" class="input" placeholder="tu@email.com"></div>
+            <div class="kv"><div class="label">Requerido</div><label><input type="checkbox" id="inpRequired"> Obligatorio</label></div>
+            <div class="row"><button class="btn mini" id="inpApply">Aplicar</button></div>
+          </div>
+
+          <!-- CALENDLY -->
+          <div id="calTools" style="display:none">
+            <div class="label">Calendly</div>
+            <div class="kv"><div class="label">URL</div><input id="calUrl" class="input" placeholder="https://calendly.com/tu-usuario/30min"></div>
+            <div class="kv"><div class="label">Alto</div><input id="calHeight" class="input small" type="number" min="300" step="10" value="700"></div>
+            <div class="kv"><div class="label">Tema</div>
+              <select id="calTheme" class="select">
+                <option value="auto">Auto</option>
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+                <option value="glass">Glass</option>
+              </select>
+            </div>
+            <div class="row"><button class="btn mini" id="calApply">Aplicar</button></div>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- MODAL PEGAR HTML -->
+  <div class="modal" id="pasteModal" aria-hidden="true">
+    <div class="scrim"></div>
+    <div class="dialog">
+      <div class="head">
+        <strong>Pegar HTML desde IA / Make</strong>
+        <button class="btn mini ghost" id="closePaste">Cerrar</button>
+      </div>
+      <div class="body">
+        <textarea id="pasteBox" class="input" style="width:100%; min-height:52vh" placeholder="Pega aquí el HTML completo generado por la IA (con marcas PF)…"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="loadPasted">Cargar en Editor</button>
+          <span class="label">Acepta también ```html … ```</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   Config / Stores / Login
+   ========================= */
+const CLIENT_ID = "668657005630-cljvl7bjqt10iim27aptl60bjqibn5vl.apps.googleusercontent.com";
+const CRM_ENDPOINT = "https://script.google.com/macros/s/AKfycbyRp2Y8yhJ1k4M5ZBDjQ1iC7x5KJW8wZvMiE9s8vh3cX_icO7K_4pJEbTxbCIqyDdXKLQ/exec";
+const LS_LANDINGS = 'pf_landings';
+
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>Array.from(el.querySelectorAll(s));
+const statusEl = $('#status');
+const iframe = $('#stage');
+const deviceWrap = $('#deviceWrap');
+
+function readLandings(){ try { return JSON.parse(localStorage.getItem(LS_LANDINGS) || '[]'); } catch { return []; } }
+function writeLandings(list){ localStorage.setItem(LS_LANDINGS, JSON.stringify(list || [])); }
+
+/* Login UI */
+let ID_TOKEN=null, USER_EMAIL=null, USER_NAME=null, USER_PIC=null;
+function b64urlToUtf8(b64url){ let b64 = b64url.replace(/-/g,'+').replace(/_/g,'/'); const pad = b64.length % 4; if(pad) b64 += '='.repeat(4-pad); const bin = atob(b64); try{ return decodeURIComponent(Array.from(bin, c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join('')); }catch(_){ return bin; } }
+function decodeJwtPayload(token){ try{ return JSON.parse(b64urlToUtf8(token.split('.')[1]||'')) }catch(_){ return {} } }
+async function apiWhoAmI(idToken){ const u = new URL(CRM_ENDPOINT); u.searchParams.set('action','whoami'); u.searchParams.set('id_token', idToken); const r = await fetch(u); return r.json(); }
+
+window.addEventListener('load', async ()=>{
+  if(window.google?.accounts?.id){
+    google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onGoogleSignIn });
+    const btn = $('#btnGoogle'); if(btn) google.accounts.id.renderButton(btn, { theme:'outline', size:'medium', type:'standard', shape:'pill' });
+  }
+  // Autologin
+  const t = localStorage.getItem('psico_id_token');
+  const n = localStorage.getItem('psico_name');
+  const e = localStorage.getItem('psico_email');
+  const p = localStorage.getItem('psico_pic');
+  if(t){
+    const w = await apiWhoAmI(t).catch(()=>({ok:false}));
+    if(w.ok){
+      ID_TOKEN=t; USER_EMAIL=w.email||e||null; USER_NAME=n||null; USER_PIC=p||null;
+      $('#loginStatus').textContent='Conectado: '+USER_EMAIL;
+      const prof=$('#profile'); if(prof){ prof.style.display='flex'; $('#avatarImg').src=USER_PIC||''; }
+    }
+  }
+  renderRecents();
+
+  // Perfil menú toggle
+  const profile = $('#profile');
+  profile?.addEventListener('click', (e)=>{ profile.classList.toggle('open'); });
+  document.addEventListener('click', (e)=>{ if(profile && !profile.contains(e.target)) profile.classList.remove('open'); });
+  $('#logoutBtn')?.addEventListener('click', ()=>{
+    try{ google?.accounts?.id?.disableAutoSelect?.(); }catch(_){}
+    localStorage.removeItem('psico_id_token'); localStorage.removeItem('psico_email'); localStorage.removeItem('psico_name'); localStorage.removeItem('psico_pic');
+    location.href = '/';
+  });
+});
+
+/* =========================
+   Utilidades
+   ========================= */
+function isFullHTML(t=''){ const s=String(t||'').trim(); const low=s.toLowerCase(); if(low.includes('<html')&&low.includes('</html>')) return true; const m=/```html?\s*([\s\S]*?)```/i.exec(s); return !!(m && /<\/html>/i.test(m[1])); }
+function extractHTML(t=''){ const s=String(t||''); if(isFullHTML(s)) return s; const m=/```html?\s*([\s\S]*?)```/i.exec(s); return m?m[1]:s; }
+function readFileAsText(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsText(file); }); }
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); }); }
+function clamp(n,min,max){ return Math.min(Math.max(n,min),max); }
+function rgb2hex(rgb){ const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb||''); if(!m) return '#0b1220'; return '#'+[m[1],m[2],m[3]].map(x=> (+x).toString(16).padStart(2,'0')).join(''); }
+
+/* =========================
+   Editor Core
+   ========================= */
+let currentSchema = null;
+let selectedEl = null;
+let selectedBlock = null;
+
+async function loadHTMLIntoEditor(html){
+  const clean = extractHTML(html);
+  iframe.srcdoc = clean;
+  statusEl.textContent='Cargando documento…';
+  await new Promise(r=> iframe.addEventListener('load', r, {once:true}));
+  const doc = iframe.contentDocument;
+
+  injectEditorCSS(doc);
+  // Desactivar navegación en preview (no perder progreso)
+  disableLinksInPreview(doc);
+
+  wrapPFBlocks(doc);
+  currentSchema = readSchema(doc) || buildSchemaFromDOM(doc);
+  writeSchema(doc, currentSchema);
+  bindEditingHandlers(doc);
+  enableInlineEditing(doc, true);
+  hydrateThemeControls(doc, currentSchema?.theme || {});
+  // color de fondo página
+  $('#pageBg').value = rgb2hex(getComputedStyle(doc.body).backgroundColor || '#ffffff');
+
+  // Inyectar manejadores de formularios (validación + gracias)
+  attachFormEnhancer(doc);
+
+  statusEl.textContent='Documento listo para editar.';
+}
+
+/* CSS y herramientas internas del iframe (handles, resizers) */
+function injectEditorCSS(doc){
+  const style = doc.createElement('style');
+  style.textContent = `
+  .pf-block{ position:relative; outline:1px dashed rgba(11,95,255,.35); border-radius:12px; padding:4px; margin:4px 0}
+  .pf-block:hover{ outline-color: rgba(11,95,255,.7) }
+  .pf-handle{
+    position:absolute; left:8px; top:-12px; transform: translateY(-100%);
+    background:rgba(255,255,255,.95); border:1px solid rgba(11,95,255,.26);
+    color:#0b3aa6; border-radius:10px; font: 12px/1.2 sans-serif;
+    padding:4px 8px; box-shadow: 0 8px 18px rgba(2,6,23,.1); cursor:grab; user-select:none;
+  }
+  .pf-block.drag-over{ outline:2px solid #0ea5e9 }
+  [data-pf]{ outline: 0px solid transparent; }
+  [data-pf].pf-sel{ outline:2px solid rgba(14,165,233,.7); border-radius:8px }
+  [contenteditable="true"]{ caret-color:#0b5fff; }
+  /* Resizers para imágenes y elementos en modo libre */
+  .pf-resize-wrap{ position:relative; display:inline-block }
+  .pf-resizer{ position:absolute; width:10px; height:10px; background:#0b5fff; border:2px solid #fff; border-radius:999px; box-shadow:0 0 0 1px rgba(0,0,0,.15); cursor:nwse-resize }
+  .pf-resizer.ne{ top:-6px; right:-6px; cursor:nesw-resize }
+  .pf-resizer.nw{ top:-6px; left:-6px;  cursor:nwse-resize }
+  .pf-resizer.se{ bottom:-6px; right:-6px; cursor:nwse-resize }
+  .pf-resizer.sw{ bottom:-6px; left:-6px;  cursor:nesw-resize }
+
+  .pf-free{ position:absolute; }
+  .pf-glass{ background: rgba(255,255,255,.72); backdrop-filter: blur(10px); border:1px solid rgba(11,95,255,.14); border-radius: 14px; }
+  .pf-shadow-0{ box-shadow:none }
+  .pf-shadow-1{ box-shadow: 0 10px 24px rgba(2,6,23,.10) }
+  .pf-shadow-2{ box-shadow: 0 18px 44px rgba(2,6,23,.14) }
+  .pf-shadow-3{ box-shadow: 0 26px 64px rgba(2,6,23,.18) }
+
+  /* Calendly card aesthetic */
+  .pf-cal-card{ border:1px solid rgba(11,95,255,.16); border-radius:16px; overflow:hidden; box-shadow:0 16px 40px rgba(2,6,23,.10); background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86)); }
+  .pf-cal-head{ display:flex; align-items:center; gap:10px; padding:12px; border-bottom:1px solid rgba(11,95,255,.12); }
+  .pf-cal-dot{ width:10px; height:10px; border-radius:50%; background:var(--pf-primary,#0ea5e9) }
+  .pf-cal-body{ padding:0; }
+  .pf-cal-body iframe{ display:block; width:100%; border:0; }
+
+  /* Testimonial cards */
+  .pf-test-grid{ display:grid; gap:14px; grid-template-columns: repeat(3,1fr); }
+  .pf-test-card{ border:1px solid rgba(11,95,255,.14); border-radius:16px; background:rgba(255,255,255,.9); padding:14px; box-shadow:0 10px 28px rgba(2,6,23,.1); }
+  .pf-test-card .pf-test-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px }
+  .pf-test-card img{ width:42px; height:42px; border-radius:12px; object-fit:cover; border:1px solid rgba(11,95,255,.14) }
+  .pf-test-name{ font-weight:800 }
+  .pf-stars{ font-size:14px; letter-spacing:.5px; color:#f59e0b }
+
+  /* Gracias form */
+  .pf-thanks{
+    border:1px solid rgba(11,95,255,.16); border-radius:18px; padding:24px; text-align:center;
+    background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.88));
+    box-shadow:0 18px 44px rgba(2,6,23,.14);
+  }
+  `;
+  doc.head.appendChild(style);
+}
+
+/* Desactivar navegación en el preview (anchors & target) */
+function disableLinksInPreview(doc){
+  // interceptar clicks en <a>
+  doc.addEventListener('click', (e)=>{
+    const a = e.target.closest('a');
+    if(!a) return;
+    // permitir anchors internos con # solo hacer scroll suave sin cambiar top-level
+    e.preventDefault();
+    const href = a.getAttribute('href')||'';
+    if(href.startsWith('#')){
+      const target = doc.querySelector(href);
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }, true);
+}
+
+/* PF Blocks envolver */
+function wrapPFBlocks(doc){
+  const tw = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
+  const starts = []; const pairs = []; let node;
+  while(node = tw.nextNode()){
+    const txt = (node.nodeValue||'').trim();
+    const mStart = /^PF:START\s+section="([^"]+)"(?:\s+id="([^"]+)")?/i.exec(txt);
+    const mEnd   = /^PF:END/i.test(txt);
+    if(mStart){ starts.push({node, section:mStart[1], id:mStart[2] || ('blk-'+Math.random().toString(36).slice(2,8))}); }
+    if(mEnd){ const start = starts.pop(); if(start){ pairs.push({start: start.node, end: node, meta: {section:start.section, id:start.id}}); } }
+  }
+  pairs.forEach(pair=>{
+    const wrapper = doc.createElement('div');
+    wrapper.className='pf-block';
+    wrapper.setAttribute('data-pf-block-id', pair.meta.id);
+    wrapper.setAttribute('data-pf-section', pair.meta.section);
+    wrapper.setAttribute('draggable', 'true');
+
+    const handle = doc.createElement('div');
+    handle.className='pf-handle';
+    handle.textContent = pair.meta.section + ' • ' + pair.meta.id;
+    wrapper.appendChild(handle);
+
+    let n = pair.start.nextSibling; const end = pair.end; const frag = doc.createDocumentFragment();
+    while(n && n !== end){ const next = n.nextSibling; frag.appendChild(n); n = next; }
+    wrapper.appendChild(frag);
+    pair.start.parentNode.insertBefore(wrapper, pair.start);
+    pair.start.remove(); pair.end.remove();
+  });
+  bindBlockDragDrop(doc);
+}
+/* DragDrop Blocks */
+function bindBlockDragDrop(doc){
+  doc.querySelectorAll('.pf-block').forEach(blk=>{
+    const handle=blk.querySelector('.pf-handle');
+    if(!handle) return;
+    handle.addEventListener('dragstart', e=>{
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain', blk.getAttribute('data-pf-block-id'));
+    });
+    blk.addEventListener('dragover', e=>{ e.preventDefault(); blk.classList.add('drag-over'); });
+    blk.addEventListener('dragleave', e=>{ blk.classList.remove('drag-over'); });
+    blk.addEventListener('drop', e=>{
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      const dragged = doc.querySelector('[data-pf-block-id="'+id+'"]');
+      if(dragged && dragged!==blk){
+        blk.parentNode.insertBefore(dragged, blk);
+      }
+      blk.classList.remove('drag-over');
+    });
+  });
+}
+
+/* Schema Handling */
+function readSchema(doc){
+  const el = doc.querySelector('#pf-schema');
+  if(!el) return null;
+  try{ return JSON.parse(el.textContent); }catch(e){ return null; }
+}
+function writeSchema(doc,schema){
+  let el = doc.querySelector('#pf-schema');
+  if(!el){ el=doc.createElement('script'); el.id='pf-schema'; el.type='application/json'; doc.body.appendChild(el); }
+  el.textContent = JSON.stringify(schema||{},null,2);
+}
+function buildSchemaFromDOM(doc){
+  return {theme:{}, blocks:[...doc.querySelectorAll('[data-pf-block-id]')].map(el=>({id:el.getAttribute('data-pf-block-id'), section:el.getAttribute('data-pf-section')}))};
+}
+
+/* Inline editing */
+function enableInlineEditing(doc,enabled=true){
+  doc.querySelectorAll('[data-pf="text"], [data-pf^="input:"]').forEach(el=>{
+    if(el.matches('[data-pf="text"]')){
+      el.contentEditable = enabled;
+    }
+  });
+}
+
+/* Bind editing handlers */
+function bindEditingHandlers(doc){
+  doc.addEventListener('click', e=>{
+    const target = e.target;
+    if(target.closest('.pf-handle')) return;
+    if(target.hasAttribute('data-pf')){
+      selectElement(target);
+    } else if(target.closest('[data-pf-block-id]')){
+      selectBlock(target.closest('[data-pf-block-id]'));
+    } else {
+      clearSelection();
+    }
+  });
+}
+
+function selectElement(el){
+  clearSelection();
+  selectedEl=el;
+  el.classList.add('pf-sel');
+  $('#noSelection').style.display='none';
+  if(el.getAttribute('data-pf')==='text'){
+    $('#textTools').style.display='block';
+    $('#txtValue').value = el.innerText;
+    $('#txtColor').value = rgb2hex(getComputedStyle(el).color);
+  }
+  if(el.tagName==='IMG'){
+    $('#imgTools').style.display='block';
+    $('#imgUrl').value=el.src;
+    $('#imgAlt').value=el.alt||'';
+  }
+  if(el.tagName==='A'){
+    $('#linkTools').style.display='block';
+    $('#lnkText').value=el.innerText;
+    $('#lnkHref').value=el.getAttribute('href');
+  }
+  if(el.tagName==='INPUT' || el.tagName==='TEXTAREA'){
+    $('#inputTools').style.display='block';
+    $('#inpPlaceholder').value=el.placeholder||'';
+    $('#inpRequired').checked=el.required||false;
+  }
+}
+function selectBlock(el){
+  clearSelection();
+  selectedBlock=el;
+  el.classList.add('pf-sel');
+  $('#noSelection').style.display='none';
+  $('#blockTools').style.display='block';
+}
+function clearSelection(){
+  const doc=iframe.contentDocument;
+  if(selectedEl){ selectedEl.classList.remove('pf-sel'); }
+  if(selectedBlock){ selectedBlock.classList.remove('pf-sel'); }
+  selectedEl=null; selectedBlock=null;
+  $('#blockTools,#textTools,#imgTools,#videoTools,#linkTools,#inputTools,#calTools').forEach?null:null;
+  $$('#blockTools,#textTools,#imgTools,#videoTools,#linkTools,#inputTools,#calTools').forEach(el=>el.style.display='none');
+  $('#noSelection').style.display='block';
+}
+
+/* Hydrate theme controls */
+function hydrateThemeControls(doc,theme){
+  $('#tPrimary').value=theme.primary||'#0ea5e9';
+  $('#tAccent').value=theme.accent||'#0b5fff';
+}
+
+/* Form Enhancer */
+function attachFormEnhancer(doc){
+  doc.querySelectorAll('form').forEach(form=>{
+    form.addEventListener('submit',e=>{
+      e.preventDefault();
+      if(!form.checkValidity()){
+        alert('Por favor completa correctamente el formulario.');
+        return;
+      }
+      const data=new FormData(form);
+      const obj={}; data.forEach((v,k)=>obj[k]=v);
+      fetch(CRM_ENDPOINT,{method:'POST',body:JSON.stringify(obj)})
+      .then(r=>r.json()).then(resp=>{
+        form.outerHTML='<div class="pf-thanks"><h2>¡Gracias!</h2><p>Se registró tu envío correctamente.</p></div>';
+      }).catch(_=>{
+        alert('Error al enviar.');
+      });
+    });
+  });
+}
+
+/* Render recientes */
+function renderRecents(){
+  const list=$('#recentList');
+  if(!list) return;
+  list.innerHTML='';
+  const recs=readLandings();
+  recs.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML='<div class="name">'+r.name+'</div><div>'+new Date(r.date).toLocaleString()+'</div>';
+    list.appendChild(div);
+  });
+}
+
+/* Events UI */
+$('#btnOpenFile')?.addEventListener('click',()=>$('#fileInput').click());
+$('#fileInput')?.addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const t=await readFileAsText(f); loadHTMLIntoEditor(t);
+});
+$('#btnPaste')?.addEventListener('click',()=>$('#pasteModal').classList.add('active'));
+$('#closePaste')?.addEventListener('click',()=>$('#pasteModal').classList.remove('active'));
+$('#loadPasted')?.addEventListener('click',()=>{ const t=$('#pasteBox').value; if(!t){alert('Nada pegado');return;} loadHTMLIntoEditor(t); $('#pasteModal').classList.remove('active'); });
+
+$('#pageBg')?.addEventListener('input',e=>{
+  iframe.contentDocument.body.style.backgroundColor=e.target.value;
+});
+
+$('#blkDelete')?.addEventListener('click',()=>{ if(selectedBlock){ selectedBlock.remove(); clearSelection(); } });
+$('#blkDuplicate')?.addEventListener('click',()=>{ if(selectedBlock){ selectedBlock.insertAdjacentHTML('afterend',selectedBlock.outerHTML);} });
+$('#blkUp')?.addEventListener('click',()=>{ if(selectedBlock){ const p=selectedBlock.previousElementSibling; if(p) p.before(selectedBlock);} });
+$('#blkDown')?.addEventListener('click',()=>{ if(selectedBlock){ const n=selectedBlock.nextElementSibling; if(n) n.after(selectedBlock);} });
+
+$('#txtApply')?.addEventListener('click',()=>{ if(selectedEl){ selectedEl.innerText=$('#txtValue').value; selectedEl.style.color=$('#txtColor').value; }});
+$('#imgApply')?.addEventListener('click',()=>{ if(selectedEl&&selectedEl.tagName==='IMG'){ selectedEl.src=$('#imgUrl').value; selectedEl.alt=$('#imgAlt').value; }});
+$('#lnkApply')?.addEventListener('click',()=>{ if(selectedEl&&selectedEl.tagName==='A'){ selectedEl.innerText=$('#lnkText').value; selectedEl.href=$('#lnkHref').value; }});
+$('#inpApply')?.addEventListener('click',()=>{ if(selectedEl&&(selectedEl.tagName==='INPUT'||selectedEl.tagName==='TEXTAREA')){ selectedEl.placeholder=$('#inpPlaceholder').value; selectedEl.required=$('#inpRequired').checked; }});
+$('#calApply')?.addEventListener('click',()=>{ if(selectedEl){ const url=$('#calUrl').value; const h=$('#calHeight').value; const theme=$('#calTheme').value; selectedEl.innerHTML='<div class="pf-cal-card"><div class="pf-cal-head"><div class="pf-cal-dot"></div><div>Agenda</div></div><div class="pf-cal-body"><iframe src="'+url+'" height="'+h+'" style="width:100%" frameborder="0"></iframe></div></div>'; }});
+
+/* Save / Download / Preview */
+$('#btnSave')?.addEventListener('click',()=>{
+  const html=iframe.srcdoc;
+  const recs=readLandings(); recs.unshift({name:'Landing '+Date.now(), date:Date.now(), html}); writeLandings(recs.slice(0,10));
+  renderRecents();
+  alert('Guardado en localStorage');
+});
+$('#btnDownload')?.addEventListener('click',()=>{
+  const blob=new Blob([iframe.srcdoc],{type:'text/html'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='landing.html'; a.click();
+});
+$('#btnPreview')?.addEventListener('click',()=>{
+  const w=window.open(); w.document.write(iframe.srcdoc);
+});
+
+/* Device switching */
+$$('.icon-btn[data-device]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    deviceWrap.style.width=btn.getAttribute('data-device')==='100%'?'100%':btn.getAttribute('data-device')+'px';
+  });
+});
+
+/* Insert Elements (simplified) */
+$$('[data-add]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const type=btn.getAttribute('data-add');
+    const doc=iframe.contentDocument;
+    let html='';
+    if(type==='heading') html='<h2 data-pf="text">Nuevo título</h2>';
+    if(type==='text') html='<p data-pf="text">Lorem ipsum dolor sit amet</p>';
+    if(type==='image') html='<img src="https://placekitten.com/400/240" alt="img" />';
+    if(type==='video') html='<div data-pf="video">[Video aquí]</div>';
+    if(type==='faq') html='<details><summary data-pf="text">Pregunta</summary><div data-pf="text">Respuesta</div></details>';
+    if(type==='button') html='<a href="#" data-pf="link" class="btn">Botón</a>';
+    if(type==='form') html='<form data-pf="form"><input data-pf="input:email" placeholder="Email" required><button class="btn">Enviar</button></form>';
+    if(type==='calendly') html='<div data-pf="calendly"><div class="pf-cal-card"><div class="pf-cal-head"><div class="pf-cal-dot"></div><div>Calendly</div></div><div class="pf-cal-body"><iframe src="https://calendly.com/tu-usuario/30min" height="700" style="width:100%" frameborder="0"></iframe></div></div></div>';
+    if(type==='testimonials') html='<div data-pf="testimonials" class="pf-test-grid"><div class="pf-test-card"><div class="pf-test-head"><img src="https://placekitten.com/60/60"><div><div class="pf-test-name">Cliente 1</div><div class="pf-stars">★★★★★</div></div></div><div data-pf="text">Excelente servicio!</div></div><div class="pf-test-card"><div class="pf-test-head"><img src="https://placekitten.com/61/61"><div><div class="pf-test-name">Cliente 2</div><div class="pf-stars">★★★★★</div></div></div><div data-pf="text">Muy recomendado.</div></div><div class="pf-test-card"><div class="pf-test-head"><img src="https://placekitten.com/62/62"><div><div class="pf-test-name">Cliente 3</div><div class="pf-stars">★★★★☆</div></div></div><div data-pf="text">Gran experiencia.</div></div></div>';
+    if(type==='2cols') html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div data-pf="text">Col 1</div><div data-pf="text">Col 2</div></div>';
+    if(type==='3cols') html='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px"><div data-pf="text">Col 1</div><div data-pf="text">Col 2</div><div data-pf="text">Col 3</div></div>';
+    if(type==='separator') html='<hr>';
+    doc.body.insertAdjacentHTML('beforeend',html);
+  });
+});
+</script>
+</body>
+</html>
